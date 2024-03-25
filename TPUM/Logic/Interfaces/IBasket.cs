@@ -9,7 +9,7 @@ namespace  Tpum.Logic.Interfaces
 {
     public interface IBasket
     {
-        public bool Addproduct(InsturmentDTO instrument);
-        public bool RemoveProduct(InsturmentDTO instrument);
+        public bool Addproduct(InstrumentDTO instrument);
+        public bool RemoveProduct(InstrumentDTO instrument);
     }
 }

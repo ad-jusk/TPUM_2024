@@ -19,7 +19,6 @@ namespace Tpum.Data
         }
 
         public List<IInstrument> ProductStock { get; }
-        public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
 
         public void AddInstruments(List<IInstrument> instrumentsToAdd)
         {
@@ -29,7 +28,7 @@ namespace Tpum.Data
         {
             throw new NotImplementedException();
         }
-        public void ChangeInstruentCategory(Guid instrumentId, InstrumentCategory newCategory)
+        public void ChangeInstruentCategory(Guid instrumentId, InstrumentCategory newInstrumentCategory)
         {
             throw new NotImplementedException();
         }
@@ -38,11 +37,16 @@ namespace Tpum.Data
         {
             throw new NotImplementedException();
         }
-
+        public void ChangeInstrumentAge(Guid instrumentId, decimal instrumentAge)
+        {
+            throw new NotImplementedException();
+        }
         public void GetProductsWithId(List<Guid> productIds)
         {
             throw new NotImplementedException();
         }
+        public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
+        public event EventHandler<ChangeProductAgeEventArgs> ProductAgeChange;
 
 
     }

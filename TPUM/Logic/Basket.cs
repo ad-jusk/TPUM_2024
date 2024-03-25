@@ -10,12 +10,12 @@ namespace Logic
 {
     public class Basket : IBasket
     {
-        public bool Addproduct(InsturmentDTO instrument)
+        public bool Addproduct(InstrumentDTO instrument)
         {
             throw new NotImplementedException();
         }
 
-        public bool RemoveProduct(InsturmentDTO instrument)
+        public bool RemoveProduct(InstrumentDTO instrument)
         {
             throw new NotImplementedException();
         }

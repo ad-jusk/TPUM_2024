@@ -10,7 +10,9 @@ namespace Tpum.Logic.Interfaces
     public interface IStore
     {
         public bool Sell(List<Instrument> instruments);
+        public List<InstrumentDTO> GetAvailableInstruments();
         public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
+        public event EventHandler<ChangeProductAgeEventArgs> ProductAgeChange;
 
     }
 }

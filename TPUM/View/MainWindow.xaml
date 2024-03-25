@@ -3,12 +3,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:View"
+        xmlns:local="clr-namespace:View" 
+        xmlns:viewmodel="clr-namespace:Tpum.Presentation.ViewModel;assembly=ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:ViewModel}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <viewmodel:ViewModel />
+    </Window.DataContext>
     <Grid>
-        <Rectangle HorizontalAlignment="Left" Height="431" VerticalAlignment="Center" Width="175" Fill="#FF634AE7" Stroke="#FF634AE7"/>
-        <Canvas Width="900" Height="600" x:Name="MainView" Visibility="{Binding MainViewVisibility}">
+        <Rectangle HorizontalAlignment="Left" Height="431" VerticalAlignment="Center" Width="170" Fill="#FF634AE7" Stroke="#FF634AE7"/>
+        <Canvas Width="800" Height="450" x:Name="MainView" Visibility="{Binding MainViewVisibility}">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Vertical" Width="150" Height="400" Margin="10 10 10 10">
                     <Button Content="Pianina" MinHeight="40" MinWidth="150" Margin="0 0" Command= "{Binding PianoButton}" Background="{x:Null}" BorderBrush="White" Foreground="White"/>
@@ -18,10 +22,23 @@
                     <Button Content="Koszyk" MinHeight="40" MinWidth="150" Margin="0 200 0 0" Command= "{Binding BasketButton}" BorderBrush="White" Foreground="White" Background="#FF161566"/>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock x:Name="PromotionLink" FontSize="28">
-                    </TextBlock>
-                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="200 30 10 30" Width="580" >
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding Instruments}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Width="560" Height="150" Margin="10 10 10 10" Command="{Binding Path=DataContext.InstrumentButtonClick, RelativeSource={RelativeSource AncestorType=ItemsControl}, Mode=Default}" CommandParameter="{Binding ID}">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Image Source="piano.jpg"/>
+                                        <TextBlock VerticalAlignment="Center" FontSize="25" Margin="50 0" Text="{Binding Name}"/>
+                                        <TextBlock VerticalAlignment="Center" FontSize="25" Margin="50 0" Text="{Binding Price, StringFormat=0.00 PLN}"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </StackPanel>
         </Canvas>
     </Grid>

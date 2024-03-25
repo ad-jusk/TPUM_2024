@@ -16,7 +16,9 @@ namespace Tpum.Data.Interfaces
         public void GetProductsWithId(List<Guid> productIds);
         public void ChangeInstruentCategory(Guid instrumentId, InstrumentCategory newCategory); 
         public void ChangeInstrumentPrice(Guid instrumentId, decimal instrumentPrice); 
+
         public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
+        public event EventHandler<ChangeProductAgeEventArgs> ProductAgeChange;
 
     }
 }
