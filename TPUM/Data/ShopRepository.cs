@@ -14,7 +14,8 @@ namespace Tpum.Data
         public ShopRepository() 
         {
             ProductStock = new List<IInstrument>();
-            ProductStock.Add(new Instrument("pianino", InstrumentCategory.strunowe, 40000, 3));
+            ProductStock.Add(new Instrument("pianino", InstrumentCategory.strunowe, 4000, 3));
+            ProductStock.Add(new Instrument("pianino elektryczne", InstrumentCategory.strunowe, 2000, 2));
 
         }
 

@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace View
+namespace Tpum.Presentation.View
 {
     /// <summary>
     /// Interaction logic for App.xaml

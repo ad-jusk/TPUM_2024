@@ -18,6 +18,7 @@ namespace Tpum.Presentation.ViewModel
         {
             _model = model;
             _instruments = new ObservableCollection<InstrumentP>();
+            MainViewVisibility = _model.MainViewVisibility;
             InstrumentButtonClick = new RelayCommand<Guid>((id) => InstrumentButtonClickHandler(id));
             
             var fruits = _model.StorePresentation.GetInstruments();
