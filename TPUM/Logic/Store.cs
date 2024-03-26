@@ -24,6 +24,12 @@ namespace Tpum.Logic
                 .ToList();
         }
 
+        public InstrumentDTO GetInstrumentById(Guid id)
+        {
+            IInstrument? i = shopRepository.GetInstrumentById(id) ?? throw new ArgumentException("Instrumnent with id " + id + " not found");
+            return new InstrumentDTO { Id = i.Id, Name = i.Name, Category = i.Category.ToString(), Price = i.Price, Year = i.Year, Quantity = i.Quantity };
+        }
+
         public List<InstrumentDTO> GetInstrumentsByCategory(InstrumentCategory category)
         {
             return shopRepository.GetInstrumentsByCategory(category)

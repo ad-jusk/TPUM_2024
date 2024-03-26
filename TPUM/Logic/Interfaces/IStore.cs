@@ -8,6 +8,8 @@ namespace Tpum.Logic.Interfaces
 
         public List<InstrumentDTO> GetInstrumentsByCategory(InstrumentCategory category);
 
+        public InstrumentDTO GetInstrumentById(Guid id);
+
         public void DecrementInstrumentQuantity(Guid instrumentId);
 
         public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
