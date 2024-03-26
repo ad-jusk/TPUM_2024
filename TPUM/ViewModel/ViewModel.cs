@@ -1,11 +1,9 @@
 ﻿using GalaSoft.MvvmLight.Command;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Tpum.Presentation.Model;
-using Tpum.Presentation.Model.Interfaces;
 
 namespace Tpum.Presentation.ViewModel
 {
@@ -16,8 +14,6 @@ namespace Tpum.Presentation.ViewModel
         private string mainViewVisibility;
         private readonly Timer timer;
         private readonly Model.Model model;
-        private readonly IBasketP basketP;
-        private decimal basketSum;
 
         public ViewModel()
         {
@@ -25,7 +21,6 @@ namespace Tpum.Presentation.ViewModel
             this.instruments = new ObservableCollection<InstrumentPresentation>(this.model.GetInstruments());
             this.mainViewVisibility = "a"; // model.MainViewVisibility;
             InstrumentButtonClick = new RelayCommand<Guid>((id) => InstrumentButtonClickHandler(id));
-            Assembly assembly = Assembly.GetExecutingAssembly();
         }
 
         public ICommand PianoButton { get; private set; }
@@ -63,14 +58,7 @@ namespace Tpum.Presentation.ViewModel
 
         private void InstrumentButtonClickHandler(Guid id)
         {
-            foreach (InstrumentPresentation instrument in model.GetInstruments())
-            {
-                if (instrument.Id.Equals(id))
-                {
-                    basketP.AddProduct(instrument);
-                    basketSum = basketP.SumProducts();
-                }
-            }
+
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

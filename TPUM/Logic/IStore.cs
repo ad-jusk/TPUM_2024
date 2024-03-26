@@ -1,6 +1,7 @@
 ﻿using Tpum.Data.Enums;
+using Tpum.Logic;
 
-namespace Tpum.Logic.Interfaces
+namespace Logic
 {
     public interface IStore
     {

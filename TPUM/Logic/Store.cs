@@ -1,6 +1,6 @@
-﻿using Tpum.Data.Enums;
+﻿using Logic;
+using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
-using Tpum.Logic.Interfaces;
 
 namespace Tpum.Logic
 {

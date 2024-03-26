@@ -1,5 +1,5 @@
-﻿using Tpum.Data.Enums;
-using Tpum.Logic.Interfaces;
+﻿using Logic;
+using Tpum.Data.Enums;
 
 namespace Tpum.Presentation.Model
 {
