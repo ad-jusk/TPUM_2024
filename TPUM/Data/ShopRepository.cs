@@ -9,7 +9,7 @@ namespace Tpum.Data
     {
         private readonly List<IInstrument> productStock;
         public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
-        public event EventHandler<ChangeProductAgeEventArgs> ProductAgeChange;
+        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
 
         public ShopRepository() 
         {

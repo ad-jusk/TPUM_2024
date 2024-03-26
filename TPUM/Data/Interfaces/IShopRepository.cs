@@ -5,7 +5,7 @@ namespace Tpum.Data.Interfaces
     public interface IShopRepository
     {
         public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
-        public event EventHandler<ChangeProductAgeEventArgs> ProductAgeChange;
+        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
 
         public void AddInstruments(List<IInstrument> instrumentsToAdd);
         public void AddInstrument(IInstrument instrument);

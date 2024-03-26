@@ -1,16 +1,17 @@
-﻿using Logic;
-using Tpum.Data.Enums;
+﻿using Tpum.Data.Enums;
+using Tpum.Logic.Interfaces;
 
 namespace Tpum.Presentation.Model
 {
     public class StorePresentation
     {
-        public event EventHandler<Tpum.Presentation.Model.ChangeProductAgeEventArgs> ProductAgeChange;
+        public event EventHandler<Tpum.Presentation.Model.ChangeProductQuantityEventArgs> ProductQuantityChange;
         private readonly IStore store;
 
         public StorePresentation(IStore store)
         {
             this.store = store;
+            this.store.ProductQuantityChange += OnQuantityChanged; 
         }
 
         public List<InstrumentPresentation> GetInstruments()
@@ -33,9 +34,9 @@ namespace Tpum.Presentation.Model
             store.DecrementInstrumentQuantity(instrumentId);
         }
 
-        private void OnAgeChanged(object sender, Tpum.Logic.ChangeProductAgeEventArgs e)
+        private void OnQuantityChanged(object sender, Tpum.Logic.ChangeProductQuantityEventArgs e)
         {
-            ProductAgeChange.Invoke(this, new Tpum.Presentation.Model.ChangeProductAgeEventArgs(e.Id, e.Age));
+            ProductQuantityChange.Invoke(this, new Tpum.Presentation.Model.ChangeProductQuantityEventArgs(e.Id, e.Quantity));
         }
     }
 }

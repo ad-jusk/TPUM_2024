@@ -1,5 +1,6 @@
 ﻿using Tpum.Data;
 using Tpum.Logic;
+using Tpum.Logic.Interfaces;
 
 namespace Logic
 {

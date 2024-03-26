@@ -1,19 +1,20 @@
-﻿using Logic;
-using Tpum.Data.Enums;
+﻿using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
+using Tpum.Logic.Interfaces;
 
 namespace Tpum.Logic
 {
     public class Store : IStore
     {
         public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
-        public event EventHandler<ChangeProductAgeEventArgs> ProductYearChange;
+        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
         private readonly IShopRepository shopRepository;
         
         public Store(IShopRepository shopRepository)
         {
             this.shopRepository = shopRepository;
             this.shopRepository.ProductPriceChange += OnPriceChanged;
+            this.shopRepository.ProductQuantityChange += OnQuantityChanged;
         }
 
         public List<InstrumentDTO> GetAvailableInstruments()
@@ -38,6 +39,10 @@ namespace Tpum.Logic
         private void OnPriceChanged(object sender, Tpum.Data.ChangeProductPriceEventArgs e)
         {
             ProductPriceChange?.Invoke(this, new Tpum.Logic.ChangeProductPriceEventArgs(e.Id, e.Price));
+        }
+        private void OnQuantityChanged(object sender, Tpum.Data.ChangeProductQuantityEventArgs e)
+        {
+            ProductQuantityChange?.Invoke(this, new Tpum.Logic.ChangeProductQuantityEventArgs(e.Id, e.Quantity));
         }
     }
 }

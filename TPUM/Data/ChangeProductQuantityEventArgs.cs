@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Tpum.Data
 {
-    public class ChangeProductAgeEventArgs : EventArgs
+    public class ChangeProductQuantityEventArgs : EventArgs
     {
-        public ChangeProductAgeEventArgs(Guid id, decimal age)
+        public ChangeProductQuantityEventArgs(Guid id, int quantity)
         {
             Id = id;
-            Age = age;
+            Quantity = quantity;
         }
 
         public Guid Id { get; }
-        public decimal Age { get; }
+        public int Quantity { get; }
     }
 }

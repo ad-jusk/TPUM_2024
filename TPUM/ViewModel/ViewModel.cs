@@ -1,6 +1,7 @@
 ﻿using GalaSoft.MvvmLight.Command;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Tpum.Presentation.Model;
@@ -14,6 +15,7 @@ namespace Tpum.Presentation.ViewModel
         private string mainViewVisibility;
         private readonly Timer timer;
         private readonly Model.Model model;
+        private decimal basketSum;
 
         public ViewModel()
         {
@@ -21,6 +23,9 @@ namespace Tpum.Presentation.ViewModel
             this.instruments = new ObservableCollection<InstrumentPresentation>(this.model.GetInstruments());
             this.mainViewVisibility = "a"; // model.MainViewVisibility;
             InstrumentButtonClick = new RelayCommand<Guid>((id) => InstrumentButtonClickHandler(id));
+            model.Store.ProductQuantityChange += OnQuantityChanged;
+
+            Assembly assembly = Assembly.GetExecutingAssembly();
         }
 
         public ICommand PianoButton { get; private set; }
@@ -58,12 +63,27 @@ namespace Tpum.Presentation.ViewModel
 
         private void InstrumentButtonClickHandler(Guid id)
         {
+            foreach (InstrumentPresentation instrument in model.GetInstruments())
+            {
+                if (instrument.Id.Equals(id))
+                {
 
+                }
+            }
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void OnQuantityChanged(object sender, Tpum.Presentation.Model.ChangeProductQuantityEventArgs e)
+        {
+            ObservableCollection<InstrumentPresentation> newInstruments = Instruments;
+            InstrumentPresentation instrument = newInstruments.FirstOrDefault(x => x.Id == e.Id);
+            int fruitIndex = newInstruments.IndexOf(instrument);
+            newInstruments[fruitIndex].Quantity = e.Quantity;
+            Instruments = new ObservableCollection<InstrumentPresentation>(newInstruments);
         }
     }
 }

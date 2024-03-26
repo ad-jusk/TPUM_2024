@@ -1,7 +1,6 @@
 ﻿using Tpum.Data.Enums;
-using Tpum.Logic;
 
-namespace Logic
+namespace Tpum.Logic.Interfaces
 {
     public interface IStore
     {
@@ -12,5 +11,6 @@ namespace Logic
         public void DecrementInstrumentQuantity(Guid instrumentId);
 
         public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
+        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
     }
 }
