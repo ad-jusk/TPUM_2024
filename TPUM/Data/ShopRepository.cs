@@ -14,9 +14,14 @@ namespace Tpum.Data
         public ShopRepository() 
         {
             productStock = [
-                new Instrument("pianino", InstrumentCategory.strunowe, 4000, 2014, 10),
-                new Instrument("pianino elektryczne", InstrumentCategory.strunowe, 2000, 2020, 20),
-                new Instrument("trabka", InstrumentCategory.dęte, 1000, 2018, 5),
+                new Instrument("Pianino", InstrumentCategory.String, 4000, 2014, 10),
+                new Instrument("Fortepian", InstrumentCategory.String, 4000, 2014, 10),
+                new Instrument("Gitara", InstrumentCategory.String, 2000, 2020, 20),
+                new Instrument("Trąbka", InstrumentCategory.Wind, 1000, 2018, 5),
+                new Instrument("Flet", InstrumentCategory.Wind, 1000, 2018, 5),
+                new Instrument("Harmonijka", InstrumentCategory.Wind, 1000, 2018, 5),
+                new Instrument("Tamburyn", InstrumentCategory.Percussion, 1000, 2018, 5),
+                new Instrument("Bęben", InstrumentCategory.Percussion, 1000, 2018, 5),
             ];
         }
 

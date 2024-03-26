@@ -2,8 +2,8 @@
 {
     public enum InstrumentCategory
     {
-         dęte, 
-         perkusyjne,
-         strunowe
+         String,
+         Wind,
+         Percussion
     }
 }
