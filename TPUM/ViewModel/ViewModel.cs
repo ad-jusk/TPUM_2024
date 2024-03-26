@@ -1,101 +1,81 @@
 ﻿using GalaSoft.MvvmLight.Command;
-using Logic;
-using Model.Interfaces;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using TP.GraphicalData.ViewModel.MVVMLight;
 using Tpum.Presentation.Model;
 using Tpum.Presentation.Model.Interfaces;
 
 namespace Tpum.Presentation.ViewModel
 {
-    public class ViewModel : ViewModelBase
+    public class ViewModel
     {
-        public ViewModel() : this(IModel.CreateApi())
+        public event PropertyChangedEventHandler PropertyChanged;
+        private ObservableCollection<InstrumentPresentation> instruments;
+        private string mainViewVisibility;
+        private readonly Timer timer;
+        private readonly Model.Model model;
+        private readonly IBasketP basketP;
+        private decimal basketSum;
+
+        public ViewModel()
         {
-        }
-        public ViewModel(IModel model)
-        {
-            _model = model;
-            _instruments = new ObservableCollection<InstrumentP>();
-            MainViewVisibility = _model.MainViewVisibility;
+            this.model = new Model.Model();
+            this.instruments = new ObservableCollection<InstrumentPresentation>(this.model.GetInstruments());
+            this.mainViewVisibility = "a"; // model.MainViewVisibility;
             InstrumentButtonClick = new RelayCommand<Guid>((id) => InstrumentButtonClickHandler(id));
-            
-            var fruits = _model.StorePresentation.GetInstruments();
-            foreach (var instrument in _instruments)
-            {
-                Instruments.Add(instrument);
-            }
+            Assembly assembly = Assembly.GetExecutingAssembly();
         }
 
-        public ICommand PianoButton
-        {
-            get; private set;
-        }
-        public ICommand GrandPianoButton
-        {
-            get; private set;
-        }
-        public ICommand GuitarrButton
-        {
-            get; private set;
-        }
-        public ICommand ClarinetButton
-        {
-            get; private set;
-        }
-        public ICommand BasketButton
-        {
-            get; private set;
-        }
-        public ICommand InstrumentButtonClick
-        {
-            get; set;
-        }
+        public ICommand PianoButton { get; private set; }
+        public ICommand GrandPianoButton { get; private set; }
+        public ICommand GuitarrButton { get; private set; }
+        public ICommand ClarinetButton { get; private set; }
+        public ICommand BasketButton { get; private set; }
+        public ICommand InstrumentButtonClick { get; set; }
 
         public string MainViewVisibility
         {
-            get { return _mainViewVisibility; }
+            get { return mainViewVisibility; }
             set
             {
-                if (value.Equals(_mainViewVisibility))
+                if (value.Equals(mainViewVisibility))
                     return;
-                _mainViewVisibility = value;
-                RaisePropertyChanged("MainViewVisibility");
+                mainViewVisibility = value;
+                OnPropertyChanged("MainViewVisibility");
             }
         }
-        public ObservableCollection<InstrumentP> Instruments
+        public ObservableCollection<InstrumentPresentation> Instruments
         {
             get
             {
-                return _instruments;
+                return instruments;
             }
             set
             {
-                if (value.Equals(_instruments))
+                if (value.Equals(instruments))
                     return;
-                _instruments = value;
-                RaisePropertyChanged("Instruments");
+                instruments = value;
+                OnPropertyChanged("Instruments");
             }
         }
 
-        private ObservableCollection<InstrumentP> _instruments;
-        private string _mainViewVisibility;
-        private Timer _timer;
-        private IModel _model;
-        private IBasketP _basketP;
-        private decimal _basketSum;
-
         private void InstrumentButtonClickHandler(Guid id)
         {
-            foreach (InstrumentP instrument in _model.StorePresentation.GetInstruments())
+            foreach (InstrumentPresentation instrument in model.GetInstruments())
             {
                 if (instrument.Id.Equals(id))
                 {
-                    _basketP.AddProduct(instrument);
-                    _basketSum = _basketP.SumProducts();
+                    basketP.AddProduct(instrument);
+                    basketSum = basketP.SumProducts();
                 }
             }
+        }
+
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
 using Tpum.Logic.Interfaces;
 
@@ -12,37 +7,37 @@ namespace Tpum.Logic
     public class Store : IStore
     {
         public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
-        public event EventHandler<ChangeProductAgeEventArgs> ProductAgeChange;
-        private IShopRepository _shopRepository;
+        public event EventHandler<ChangeProductAgeEventArgs> ProductYearChange;
+        private readonly IShopRepository shopRepository;
         
         public Store(IShopRepository shopRepository)
         {
-            this._shopRepository = shopRepository;
-            shopRepository.ProductPriceChange += OnPriceChanged;
+            this.shopRepository = shopRepository;
+            this.shopRepository.ProductPriceChange += OnPriceChanged;
         }
+
         public List<InstrumentDTO> GetAvailableInstruments()
         {
-            List<InstrumentDTO> result = new List<InstrumentDTO>();
-
-            foreach (IInstrument instrument in _shopRepository.ProductStock)
-            {
-                result.Add(new InstrumentDTO { Id = instrument.Id,  Name = instrument.Name, Category = instrument.Category.ToString(), Price = instrument.Price, Age = instrument.Age });
-            }
-            return result;
+            return shopRepository.GetAllInstruments()
+                .Select(i => new InstrumentDTO { Id = i.Id, Name = i.Name, Category = i.Category.ToString(), Price = i.Price, Year = i.Year, Quantity = i.Quantity })
+                .ToList();
         }
 
-        public bool Sell(List<Instrument> instruments)
+        public List<InstrumentDTO> GetInstrumentsByCategory(InstrumentCategory category)
         {
-            throw new NotImplementedException();
+            return shopRepository.GetInstrumentsByCategory(category)
+                .Select(i => new InstrumentDTO { Id = i.Id, Name = i.Name, Category = i.Category.ToString(), Price = i.Price, Year = i.Year, Quantity = i.Quantity })
+                .ToList();
+        }
+
+        public void DecrementInstrumentQuantity(Guid instrumentId)
+        {
+            shopRepository.DecrementInstrumentQuantity(instrumentId);
         }
 
         private void OnPriceChanged(object sender, Tpum.Data.ChangeProductPriceEventArgs e)
         {
             ProductPriceChange?.Invoke(this, new Tpum.Logic.ChangeProductPriceEventArgs(e.Id, e.Price));
-        }
-        private void OnAgeChanged(object sender, Tpum.Data.ChangeProductAgeEventArgs e)
-        {
-            ProductAgeChange?.Invoke(this, new Tpum.Logic.ChangeProductAgeEventArgs(e.Id, e.Age));
         }
     }
 }

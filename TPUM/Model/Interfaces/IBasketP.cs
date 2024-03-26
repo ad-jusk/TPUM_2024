@@ -9,8 +9,8 @@ namespace Tpum.Presentation.Model.Interfaces
 {
     public interface IBasketP
     {
-        ObservableCollection<InstrumentP> Instruments { get; }
+        ObservableCollection<InstrumentPresentation> Instruments { get; }
         decimal SumProducts();
-        void AddProduct(InstrumentP instrument);
+        void AddProduct(InstrumentPresentation instrument);
     }
 }

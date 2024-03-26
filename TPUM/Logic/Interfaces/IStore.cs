@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Tpum.Data.Enums;
 
 namespace Tpum.Logic.Interfaces
 {
     public interface IStore
     {
-        public bool Sell(List<Instrument> instruments);
         public List<InstrumentDTO> GetAvailableInstruments();
-        public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
-        public event EventHandler<ChangeProductAgeEventArgs> ProductAgeChange;
 
+        public List<InstrumentDTO> GetInstrumentsByCategory(InstrumentCategory category);
+
+        public void DecrementInstrumentQuantity(Guid instrumentId);
+
+        public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
     }
 }

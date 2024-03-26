@@ -3,10 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Tpum.Presentation.View" xmlns:viewmodel="clr-namespace:Tpum.Presentation.ViewModel;assembly=ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:ViewModel}"
+        xmlns:viewmodel="clr-namespace:Tpum.Presentation.ViewModel;assembly=ViewModel" d:DataContext="{d:DesignInstance Type=viewmodel:ViewModel}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
 
+    <Window.DataContext>
+        <viewmodel:ViewModel/>
+    </Window.DataContext>
+    
     <Grid>
         <Rectangle HorizontalAlignment="Left" Height="431" VerticalAlignment="Center" Width="170" Fill="#FF634AE7" Stroke="#FF634AE7"/>
         <Canvas Width="800" Height="450" x:Name="MainView" Visibility="{Binding MainViewVisibility}">
@@ -21,15 +25,15 @@
 
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="200 30 10 30" Width="580" >
-                <ScrollViewer VerticalScrollBarVisibility="Visible" Height="450">
+                <ScrollViewer VerticalScrollBarVisibility="Visible" Height="400">
                     <ItemsControl ItemsSource="{Binding Instruments}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Width="560" Height="150" Margin="10 10 10 10" Command="{Binding Path=DataContext.InstrumentButtonClick, RelativeSource={RelativeSource AncestorType=ItemsControl}, Mode=Default}" CommandParameter="{Binding ID}">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <Image Source="piano.jpg"/>
-                                        <TextBlock VerticalAlignment="Center" FontSize="25" Margin="50 0" Text="{Binding Name}"/>
-                                        <TextBlock VerticalAlignment="Center" FontSize="25" Margin="50 0" Text="{Binding Price, StringFormat=0.00 PLN}"/>
+                                        <Image Source="/View;component/Images/piano.jpg" Width="200" Height="100"/>
+                                        <TextBlock VerticalAlignment="Center" FontSize="14" Margin="50 0" Text="{Binding Name}"/>
+                                        <TextBlock VerticalAlignment="Center" FontSize="14" Margin="50 0" Text="{Binding Price, StringFormat=0.00 PLN}"/>
                                     </StackPanel>
                                 </Button>
                             </DataTemplate>

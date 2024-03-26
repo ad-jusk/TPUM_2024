@@ -11,14 +11,14 @@ namespace Tpum.Presentation.Model
 {
     public class BasketP : IBasketP
     {
-        public ObservableCollection<InstrumentP> Instruments { get; set; }
-        public BasketP(ObservableCollection<InstrumentP> instruments, IStore store)
+        public ObservableCollection<InstrumentPresentation> Instruments { get; set; }
+        public BasketP(ObservableCollection<InstrumentPresentation> instruments, IStore store)
         {
             Instruments = instruments;
             _store = store;
         }
 
-        public void AddProduct(InstrumentP instrument)
+        public void AddProduct(InstrumentPresentation instrument)
         {
             Instruments.Add(instrument);
         }

@@ -1,28 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Model.Interfaces;
-using Tpum.Logic;
-using Tpum.Logic.Interfaces;
+﻿using Logic;
+using Tpum.Data.Enums;
 
 namespace Tpum.Presentation.Model
 {
-    internal class Model : IModel
+    public class Model
     {
-        public Model(ILogic logic)
+        private readonly LogicAbstractApi logicApi;
+        private readonly StorePresentation store;
+
+        public Model(LogicAbstractApi logicApi = null)
         {
-            Logic = logic;
+            this.logicApi = logicApi ?? LogicAbstractApi.Create();
+            this.store = new StorePresentation(this.logicApi.GetStore());
         }
 
+        public List<InstrumentPresentation> GetInstruments()
+        {
+            return store.GetInstruments();
+        }
 
-        public ILogic Logic { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<InstrumentPresentation> GetInstrumentsByCategory(InstrumentCategory category)
+        {
+            return store.GetInstrumentsByCategory(category);
+        }
 
-        public StoreP StorePresentation => throw new NotImplementedException();
+        public void DecrementInstrumentQuantity(Guid instrumentId)
+        {
+            store.DecrementInstrumentQuantity(instrumentId);
+        }
+
         public string MainViewVisibility => throw new NotImplementedException();
 
         public string BasketViewVisibility => throw new NotImplementedException();
-
     }
 }
