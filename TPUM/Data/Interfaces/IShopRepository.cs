@@ -14,7 +14,8 @@ namespace Tpum.Data.Interfaces
         public IList<IInstrument> GetAllInstruments();
         public IList<IInstrument> GetInstrumentsByCategory(InstrumentCategory category);
         public IInstrument? GetInstrumentById(Guid productId);
-        public void ChangeConsumerFunds(Guid instrumentId, decimal instrumentPrice); 
+        public decimal GetConsumerFunds();
+        public void ChangeConsumerFunds(Guid instrumentId); 
         public void DecrementInstrumentQuantity(Guid instrumentId); 
     }
 }

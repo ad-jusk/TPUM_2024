@@ -13,7 +13,7 @@ namespace Tpum.Presentation.ViewModel
         public event PropertyChangedEventHandler PropertyChanged;
         private ObservableCollection<InstrumentPresentation> instruments;
         private readonly Model.Model model;
-        private decimal customerFunds;
+        private decimal consumerFunds;
 
         public ViewModel()
         {
@@ -27,7 +27,7 @@ namespace Tpum.Presentation.ViewModel
             model.Store.ProductQuantityChange += OnQuantityChanged;
             model.Store.ConsumerFundsChange += OnConsumerFundsChanged;
             model.Store.PriceChange += HandlePriceInflationChanged;
-            customerFunds = 127000.0M;
+            consumerFunds = this.model.Store.GetConsumerFunds();
         }
 
         public ICommand AllButton { get; private set; }
@@ -52,12 +52,12 @@ namespace Tpum.Presentation.ViewModel
 
         public decimal CustomerFunds
         {
-            get { return customerFunds; }
+            get { return consumerFunds; }
             set
             {
-                if (value != customerFunds)
+                if (value != consumerFunds)
                 {
-                    customerFunds = value;
+                    consumerFunds = value;
                     OnPropertyChanged();
                 }
 
@@ -108,12 +108,12 @@ namespace Tpum.Presentation.ViewModel
         private void InstrumentButtonClickHandler(Guid id)
         {
             InstrumentPresentation? instrument = model.Store.GetInstrumentById(id);
-            if (instrument == null || instrument.Price > customerFunds)
+            if (instrument == null || instrument.Price > consumerFunds)
             {
                 return;
             }
             model.Store.DecrementInstrumentQuantity(id);
-            model.Store.ChangeConsumerFunds(id, customerFunds);
+            model.Store.ChangeConsumerFunds(id);
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

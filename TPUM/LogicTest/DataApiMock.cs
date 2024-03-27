@@ -19,6 +19,7 @@ namespace LogicTest
     {
 
         private readonly List<IInstrument> instrumentStock;
+        private decimal consumerFunds;
         public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
         public event EventHandler<ChangePriceEventArgs> PriceChange;
@@ -30,6 +31,7 @@ namespace LogicTest
                 new InstrumentMock("instrument1", InstrumentCategory.String, 0M, 10, 10),
                 new InstrumentMock("instrument2", InstrumentCategory.Percussion, 0M, 10, 10)
             };
+            this.consumerFunds = 1000000M;
         }
 
         public void AddInstrument(IInstrument instrument)
@@ -74,6 +76,20 @@ namespace LogicTest
         public void RemoveInstrument(IInstrument instrument)
         {
             throw new NotImplementedException();
+        }
+
+        public decimal GetConsumerFunds()
+        {
+            return consumerFunds;
+        }
+
+        public void ChangeConsumerFunds(Guid instrumentId)
+        {
+            IInstrument? i = instrumentStock.Find(i => i.Equals(instrumentId));
+            if (i != null)
+            {
+                consumerFunds -= i.Price;
+            }
         }
     }
 }

@@ -11,7 +11,10 @@ namespace Tpum.Logic.Interfaces
         public InstrumentDTO GetInstrumentById(Guid id);
 
         public void DecrementInstrumentQuantity(Guid instrumentId);
-        public void ChangeConsumerFunds(Guid instrumentId, decimal funds);
+
+        public decimal GetConsumerFunds();
+
+        public void ChangeConsumerFunds(Guid instrumentId);
 
         public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;

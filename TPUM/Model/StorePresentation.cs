@@ -48,9 +48,14 @@ namespace Tpum.Presentation.Model
             store.DecrementInstrumentQuantity(instrumentId);
         }
 
-        public void ChangeConsumerFunds(Guid instrumentId, decimal funds)
+        public decimal GetConsumerFunds()
         {
-            store.ChangeConsumerFunds(instrumentId, funds);
+            return store.GetConsumerFunds();
+        }
+
+        public void ChangeConsumerFunds(Guid instrumentId)
+        {
+            store.ChangeConsumerFunds(instrumentId);
         }
 
         private void OnQuantityChanged(object sender, Tpum.Logic.ChangeProductQuantityEventArgs e)

@@ -11,6 +11,7 @@ namespace Tpum.Data
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
         public event EventHandler<ChangePriceEventArgs> PriceChange;
         private readonly List<IInstrument> productStock;
+        private decimal consumerFunds;
 
         public ShopRepository() 
         {
@@ -24,6 +25,7 @@ namespace Tpum.Data
                 new Instrument("Tamburyn", InstrumentCategory.Percussion, 200, 2018, 5),
                 new Instrument("Bęben", InstrumentCategory.Percussion, 800, 2018, 5),
             ];
+            consumerFunds = 120000M;
             SimulatePriceChangeAsync();
         }
 
@@ -37,13 +39,18 @@ namespace Tpum.Data
             productStock.Add(instrument);
         }
 
-        public void ChangeConsumerFunds(Guid instrumentId, decimal funds)
+        public decimal GetConsumerFunds()
+        {
+            return consumerFunds;
+        }
+
+        public void ChangeConsumerFunds(Guid instrumentId)
         {
             IInstrument? instrument = productStock.Find(i => i.Id.Equals(instrumentId));
             if (instrument != null && instrument.Price > 0 && instrument.Quantity > 0)
             {
-                funds -= instrument.Price;
-                OnConsumerFundsChanged(funds);
+                consumerFunds -= instrument.Price;
+                OnConsumerFundsChanged(consumerFunds);
             }
         }
 

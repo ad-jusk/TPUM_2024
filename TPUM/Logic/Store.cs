@@ -39,9 +39,14 @@ namespace Tpum.Logic
                 .ToList();
         }
 
-        public void ChangeConsumerFunds(Guid instrumentId, decimal funds)
+        public decimal GetConsumerFunds()
         {
-            shopRepository.ChangeConsumerFunds(instrumentId, funds);
+            return shopRepository.GetConsumerFunds();
+        }
+
+        public void ChangeConsumerFunds(Guid instrumentId)
+        {
+            shopRepository.ChangeConsumerFunds(instrumentId);
         }
 
         public void DecrementInstrumentQuantity(Guid instrumentId)
