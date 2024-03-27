@@ -13,22 +13,24 @@ namespace Tpum.Presentation.ViewModel
         public event PropertyChangedEventHandler PropertyChanged;
         private ObservableCollection<InstrumentPresentation> instruments;
         private readonly Model.Model model;
-        private float customerFunds;
+        private decimal customerFunds;
 
         public ViewModel()
         {
             this.model = new Model.Model();
             this.instruments = new ObservableCollection<InstrumentPresentation>(this.model.GetInstruments());
-            InstrumentButtonClick = new RelayCommand<Guid>((id) => InstrumentButtonClickHandler(id));
-            StringButton = new RelayCommand<Guid>((id) => StringButtonClickHandler());
-            WindButton = new RelayCommand<Guid>((id) => WindButtonClickHandler());
-            PercussionButton = new RelayCommand<Guid>((id) => PercussionButtonClickHandler());
+            InstrumentButtonClick = new RelayCommand<Guid>(id => InstrumentButtonClickHandler(id));
+            AllButton = new RelayCommand(AllButtonClickHandler);
+            StringButton = new RelayCommand(StringButtonClickHandler);
+            WindButton = new RelayCommand(WindButtonClickHandler);
+            PercussionButton = new RelayCommand(PercussionButtonClickHandler);
             model.Store.ProductQuantityChange += OnQuantityChanged;
             model.Store.ConsumerFundsChange += OnConsumerFundsChanged;
             model.Store.PriceChange += HandlePriceInflationChanged;
-            customerFunds = 120700.0f;
+            customerFunds = 127000.0M;
         }
 
+        public ICommand AllButton { get; private set; }
         public ICommand StringButton { get; private set; }
         public ICommand WindButton { get; private set; }
         public ICommand PercussionButton { get; private set; }
@@ -48,7 +50,7 @@ namespace Tpum.Presentation.ViewModel
             }
         }
 
-        public float CustomerFunds
+        public decimal CustomerFunds
         {
             get { return customerFunds; }
             set
@@ -75,6 +77,13 @@ namespace Tpum.Presentation.ViewModel
                 .ForEach(i => Instruments.Add(i));
         }
 
+        private void AllButtonClickHandler()
+        {
+            Instruments.Clear();
+            model.Store.GetInstruments()
+                .ForEach(i => Instruments.Add(i));
+        }
+
         private void StringButtonClickHandler()
         {
             Instruments.Clear();
@@ -98,20 +107,13 @@ namespace Tpum.Presentation.ViewModel
 
         private void InstrumentButtonClickHandler(Guid id)
         {
-            int i = 0;
-
-            foreach (InstrumentPresentation instrument in model.GetInstruments())
+            InstrumentPresentation? instrument = model.Store.GetInstrumentById(id);
+            if (instrument == null || instrument.Price > customerFunds)
             {
-                if (instrument.Id.Equals(id))
-                {
-                    //instrument.Quantity -= 1;
-                    model.Store.DecrementInstrumentQuantity(id);
-                    //if(CustomerFunds -(float)instrument.Price > 0) CustomerFunds -= (float)instrument.Price;
-                    model.Store.ChangeConsumerFunds(id, (decimal)customerFunds);
-                    break;
-                }
-                i++;
+                return;
             }
+            model.Store.DecrementInstrumentQuantity(id);
+            model.Store.ChangeConsumerFunds(id, customerFunds);
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -130,7 +132,7 @@ namespace Tpum.Presentation.ViewModel
 
         private void OnConsumerFundsChanged(object sender, Tpum.Presentation.Model.ChangeConsumerFundsEventArgs e)
         {
-            CustomerFunds = (float)e.Funds;
+            CustomerFunds = e.Funds;
         }
     }
 }
