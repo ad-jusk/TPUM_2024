@@ -7,9 +7,10 @@ namespace Tpum.Data
 {
     internal class ShopRepository : IShopRepository
     {
-        private readonly List<IInstrument> productStock;
-        public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
+        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
+        public event EventHandler<ChangePriceInflationEventArgs> PriceInflationChange;
+        private readonly List<IInstrument> productStock;
 
         public ShopRepository() 
         {
@@ -23,6 +24,7 @@ namespace Tpum.Data
                 new Instrument("Tamburyn", InstrumentCategory.Percussion, 1000, 2018, 5),
                 new Instrument("Bęben", InstrumentCategory.Percussion, 1000, 2018, 5),
             ];
+            SimulateInflationAsync();
         }
 
         public void AddInstruments(List<IInstrument> instrumentsToAdd)
@@ -35,12 +37,13 @@ namespace Tpum.Data
             productStock.Add(instrument);
         }
 
-        public void ChangeInstrumentPrice(Guid instrumentId, decimal instrumentPrice)
+        public void ChangeConsumerFunds(Guid instrumentId, decimal funds)
         {
             IInstrument? instrument = productStock.Find(i => i.Id.Equals(instrumentId));
-            if (instrument != null)
+            if (instrument != null && instrument.Price > 0 && instrument.Quantity > 0)
             {
-                instrument.Price = instrumentPrice;
+                funds -= instrument.Price;
+                OnConsumerFundsChanged(funds);
             }
         }
 
@@ -50,6 +53,7 @@ namespace Tpum.Data
             if (instrument != null && instrument.Quantity > 0)
             {
                 instrument.Quantity -= 1;
+                OnQuantityChanged(instrument.Id, instrument.Quantity);
             }
         }
 
@@ -57,6 +61,7 @@ namespace Tpum.Data
         {
             productStock.Remove(instrument);
         }
+        
 
         public IList<IInstrument> GetAllInstruments()
         {
@@ -71,6 +76,39 @@ namespace Tpum.Data
         public IInstrument? GetInstrumentById(Guid productId)
         {
             return productStock.Find(i => i.Id.Equals(productId));
+        }
+        private void OnConsumerFundsChanged(decimal funds)
+        {
+            EventHandler<ChangeConsumerFundsEventArgs> handler = ConsumerFundsChange;
+            handler?.Invoke(this, new ChangeConsumerFundsEventArgs(funds));
+        }
+        private void OnQuantityChanged(Guid id, int quantity)
+        {
+            EventHandler<ChangeProductQuantityEventArgs> handler = ProductQuantityChange;
+            handler?.Invoke(this, new ChangeProductQuantityEventArgs(id, quantity));
+        }
+        private async Task SimulateInflationAsync()
+        {
+            var random = new Random();
+            while (true)
+            {
+                // Wait for a random duration between 7 to 10 seconds
+                int waitMilliseconds = random.Next(7000, 10000);
+                await Task.Delay(waitMilliseconds);
+
+                // Calculate a random inflation rate between 0.8 and 1.2
+                decimal inflationRate = (decimal)random.NextDouble()*(1.2m - 0.8m) + 0.8m;
+
+                // Apply inflation to all items
+                foreach (var instrument in productStock)
+                {
+                    instrument.Price *= inflationRate;
+                }
+
+                // Notify listeners of the inflation change
+                PriceInflationChange?.Invoke(this, new ChangePriceInflationEventArgs(inflationRate));
+
+            }
         }
     }
 }

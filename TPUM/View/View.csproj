@@ -9,6 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\Bęben.jpg" />
+    <None Remove="Images\Flet.jpg" />
+    <None Remove="Images\Fortepian.jpg" />
+    <None Remove="Images\Gitara.jpg" />
+    <None Remove="Images\Harmonijka.jpg" />
+    <None Remove="Images\Pianino.jpg" />
+    <None Remove="Images\piano.jpg" />
+    <None Remove="Images\Tamburyn.jpg" />
+    <None Remove="Images\Trąbka.jpg" />
     <None Remove="piano.jpg" />
   </ItemGroup>
 
@@ -17,7 +26,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Images\Bęben.jpg" />
+    <Resource Include="Images\Flet.jpg" />
+    <Resource Include="Images\Fortepian.jpg" />
+    <Resource Include="Images\Gitara.jpg" />
+    <Resource Include="Images\Harmonijka.jpg" />
+    <Resource Include="Images\Pianino.jpg" />
+    <Resource Include="Images\Pianino2.jpg" />
     <Resource Include="Images\piano.jpg" />
+    <Resource Include="Images\Tamburyn.jpg" />
+    <Resource Include="Images\Trąbka.jpg" />
   </ItemGroup>
 
 </Project>

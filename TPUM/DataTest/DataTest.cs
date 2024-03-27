@@ -57,7 +57,7 @@ namespace DataTest
             DataAbstractApi api = PrepareDataLayer();
             decimal newPrice = 2400.9M;
             IInstrument i = api.GetShopRepository().GetAllInstruments()[0];
-            api.GetShopRepository().ChangeInstrumentPrice(i.Id, newPrice);
+            api.GetShopRepository().ChangeConsumerFunds(i.Id, newPrice);
             Assert.AreEqual(newPrice, i.Price);
         }
 

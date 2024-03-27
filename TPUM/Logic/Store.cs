@@ -6,15 +6,17 @@ namespace Tpum.Logic
 {
     public class Store : IStore
     {
-        public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
+        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
+        public event EventHandler<ChangePriceInflationEventArgs> PriceInflationChange;
         private readonly IShopRepository shopRepository;
         
         public Store(IShopRepository shopRepository)
         {
             this.shopRepository = shopRepository;
-            this.shopRepository.ProductPriceChange += OnPriceChanged;
+            this.shopRepository.ConsumerFundsChange += OnConsumerFundsChanged;
             this.shopRepository.ProductQuantityChange += OnQuantityChanged;
+            this.shopRepository.PriceInflationChange += OnFundsChanged;
         }
 
         public List<InstrumentDTO> GetAvailableInstruments()
@@ -36,19 +38,27 @@ namespace Tpum.Logic
                 .Select(i => new InstrumentDTO { Id = i.Id, Name = i.Name, Category = i.Category.ToString(), Price = i.Price, Year = i.Year, Quantity = i.Quantity })
                 .ToList();
         }
-
+        public void ChangeConsumerFunds(Guid instrumentId, decimal funds)
+        {
+            shopRepository.ChangeConsumerFunds(instrumentId, funds);
+        }
         public void DecrementInstrumentQuantity(Guid instrumentId)
         {
             shopRepository.DecrementInstrumentQuantity(instrumentId);
         }
 
-        private void OnPriceChanged(object sender, Tpum.Data.ChangeProductPriceEventArgs e)
+        private void OnConsumerFundsChanged(object sender, Tpum.Data.ChangeConsumerFundsEventArgs e)
         {
-            ProductPriceChange?.Invoke(this, new Tpum.Logic.ChangeProductPriceEventArgs(e.Id, e.Price));
+            ConsumerFundsChange?.Invoke(this, new Tpum.Logic.ChangeConsumerFundsEventArgs(e.Funds));
         }
         private void OnQuantityChanged(object sender, Tpum.Data.ChangeProductQuantityEventArgs e)
         {
             ProductQuantityChange?.Invoke(this, new Tpum.Logic.ChangeProductQuantityEventArgs(e.Id, e.Quantity));
         }
+        private void OnFundsChanged(object sender, Tpum.Data.ChangePriceInflationEventArgs e)
+        {
+            PriceInflationChange?.Invoke(this, new Tpum.Logic.ChangePriceInflationEventArgs(e));
+        }
+
     }
 }

@@ -25,14 +25,15 @@ namespace Tpum.Presentation.Model
         {
             return Store.GetInstrumentsByCategory(category);
         }
-
+        public InstrumentPresentation GetInstrumentsById(Guid Id)
+        {
+            return Store.GetInstrumentById(Id);
+        }
         public void DecrementInstrumentQuantity(Guid instrumentId)
         {
             Store.DecrementInstrumentQuantity(instrumentId);
         }
 
         public string MainViewVisibility => throw new NotImplementedException();
-
-        public string BasketViewVisibility => throw new NotImplementedException();
     }
 }

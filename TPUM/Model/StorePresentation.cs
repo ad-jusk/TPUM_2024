@@ -1,17 +1,22 @@
 ﻿using Tpum.Data.Enums;
+using Tpum.Logic;
 using Tpum.Logic.Interfaces;
 
 namespace Tpum.Presentation.Model
 {
     public class StorePresentation
     {
-        public event EventHandler<Tpum.Presentation.Model.ChangeProductQuantityEventArgs> ProductQuantityChange;
+        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
+        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
+        public event EventHandler<ChangePriceInflationEventArgs>? PriceInflationChange;
         private readonly IStore store;
 
         public StorePresentation(IStore store)
         {
             this.store = store;
-            this.store.ProductQuantityChange += OnQuantityChanged; 
+            this.store.ProductQuantityChange += OnQuantityChanged;
+            this.store.ConsumerFundsChange += OnConsumerFundsChanged;
+            this.store.PriceInflationChange += OnPriceInflationChanged;
         }
 
         public List<InstrumentPresentation> GetInstruments()
@@ -28,15 +33,35 @@ namespace Tpum.Presentation.Model
                 .Select(i => new InstrumentPresentation(i.Id, i.Name, i.Category, i.Price, i.Year, i.Quantity))
                 .ToList();
         }
+        public InstrumentPresentation GetInstrumentById(Guid id)
+        {
+            InstrumentDTO instrument = store.GetInstrumentById(id);
+            if (instrument != null)
+            {
+                return new InstrumentPresentation(instrument.Id, instrument.Name, instrument.Category, instrument.Price, instrument.Year, instrument.Quantity);
+            }
+            return null; // or throw an exception if needed
+        }
 
         public void DecrementInstrumentQuantity(Guid instrumentId)
         {
             store.DecrementInstrumentQuantity(instrumentId);
         }
-
+        public void ChangeConsumerFunds(Guid instrumentId, decimal funds)
+        {
+            store.ChangeConsumerFunds(instrumentId, funds);
+        }
         private void OnQuantityChanged(object sender, Tpum.Logic.ChangeProductQuantityEventArgs e)
         {
-            ProductQuantityChange.Invoke(this, new Tpum.Presentation.Model.ChangeProductQuantityEventArgs(e.Id, e.Quantity));
+            ProductQuantityChange?.Invoke(this, new Tpum.Presentation.Model.ChangeProductQuantityEventArgs(e.Id, e.Quantity));
+        }
+        private void OnConsumerFundsChanged(object sender, Tpum.Logic.ChangeConsumerFundsEventArgs e)
+        {
+            ConsumerFundsChange?.Invoke(this, new Tpum.Presentation.Model.ChangeConsumerFundsEventArgs(e.Funds));
+        }
+        private void OnPriceInflationChanged(object sender, Tpum.Logic.ChangePriceInflationEventArgs e)
+        {
+            PriceInflationChange?.Invoke(this, new Tpum.Presentation.Model.ChangePriceInflationEventArgs(e));
         }
     }
 }

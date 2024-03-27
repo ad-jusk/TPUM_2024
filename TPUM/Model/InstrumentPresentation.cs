@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Tpum.Data.Interfaces;
 
 namespace Tpum.Presentation.Model
 {
@@ -14,7 +15,15 @@ namespace Tpum.Presentation.Model
             Year = year;
             Quantity = quantity;
         }
-
+        public InstrumentPresentation(IInstrument instrument)
+        {
+            Id = instrument.Id;
+            Name = instrument.Name;
+            Category = instrument.Category.ToString();
+            Price = instrument.Price;
+            Year = instrument.Year;
+            Quantity = instrument.Quantity;
+        }
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; }
         public string Category { get; set; }

@@ -19,8 +19,9 @@ namespace LogicTest
     {
 
         private readonly List<IInstrument> instrumentStock;
-        public event EventHandler<ChangeProductPriceEventArgs> ProductPriceChange;
+        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
+        public event EventHandler<ChangePriceInflationEventArgs> PriceInflationChange;
 
         public ShopRepositoryMock()
         {
@@ -41,7 +42,7 @@ namespace LogicTest
             instrumentStock.AddRange(instrumentsToAdd);
         }
 
-        public void ChangeInstrumentPrice(Guid instrumentId, decimal instrumentPrice)
+        public void ChangeConsumerFunds(Guid instrumentId, decimal instrumentPrice)
         {
             throw new NotImplementedException();
         }
