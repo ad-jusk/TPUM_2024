@@ -6,9 +6,7 @@ namespace Tpum.Presentation.Model
     public class Model
     {
         private readonly LogicAbstractApi logicApi;
-        //private readonly StorePresentation store;
         public StorePresentation Store { get; private set; } // Expose StorePresentation as a public property
-
 
         public Model(LogicAbstractApi logicApi = null)
         {
@@ -25,15 +23,15 @@ namespace Tpum.Presentation.Model
         {
             return Store.GetInstrumentsByCategory(category);
         }
+
         public InstrumentPresentation GetInstrumentsById(Guid Id)
         {
             return Store.GetInstrumentById(Id);
         }
+
         public void DecrementInstrumentQuantity(Guid instrumentId)
         {
             Store.DecrementInstrumentQuantity(instrumentId);
         }
-
-        public string MainViewVisibility => throw new NotImplementedException();
     }
 }

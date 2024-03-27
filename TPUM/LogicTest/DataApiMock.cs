@@ -21,7 +21,7 @@ namespace LogicTest
         private readonly List<IInstrument> instrumentStock;
         public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangePriceInflationEventArgs> PriceInflationChange;
+        public event EventHandler<ChangePriceEventArgs> PriceChange;
 
         public ShopRepositoryMock()
         {

@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace Tpum.Logic
 {
-    public class ChangePriceInflationEventArgs : EventArgs
+    public class ChangePriceEventArgs : EventArgs
     {
         public decimal NewFunds { get; }
 
-        public ChangePriceInflationEventArgs(decimal newfunds)
+        public ChangePriceEventArgs(decimal newfunds)
         {
             this.NewFunds = newfunds;
         }
 
-        internal ChangePriceInflationEventArgs(Tpum.Data.ChangePriceInflationEventArgs args)
+        internal ChangePriceEventArgs(Tpum.Data.ChangePriceEventArgs args)
         {
             this.NewFunds = args.NewFunds;
         }

@@ -9,22 +9,22 @@ namespace Tpum.Data
     {
         public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangePriceInflationEventArgs> PriceInflationChange;
+        public event EventHandler<ChangePriceEventArgs> PriceChange;
         private readonly List<IInstrument> productStock;
 
         public ShopRepository() 
         {
             productStock = [
-                new Instrument("Pianino", InstrumentCategory.String, 4000, 2014, 10),
-                new Instrument("Fortepian", InstrumentCategory.String, 4000, 2014, 10),
-                new Instrument("Gitara", InstrumentCategory.String, 2000, 2020, 20),
-                new Instrument("Trąbka", InstrumentCategory.Wind, 1000, 2018, 5),
-                new Instrument("Flet", InstrumentCategory.Wind, 1000, 2018, 5),
-                new Instrument("Harmonijka", InstrumentCategory.Wind, 1000, 2018, 5),
-                new Instrument("Tamburyn", InstrumentCategory.Percussion, 1000, 2018, 5),
-                new Instrument("Bęben", InstrumentCategory.Percussion, 1000, 2018, 5),
+                new Instrument("Pianino", InstrumentCategory.String, 5000, 2014, 10),
+                new Instrument("Fortepian", InstrumentCategory.String, 6000, 2014, 10),
+                new Instrument("Gitara", InstrumentCategory.String, 2200, 2020, 20),
+                new Instrument("Trąbka", InstrumentCategory.Wind, 1500, 2018, 5),
+                new Instrument("Flet", InstrumentCategory.Wind, 1100, 2018, 5),
+                new Instrument("Harmonijka", InstrumentCategory.Wind, 900, 2018, 5),
+                new Instrument("Tamburyn", InstrumentCategory.Percussion, 200, 2018, 5),
+                new Instrument("Bęben", InstrumentCategory.Percussion, 800, 2018, 5),
             ];
-            SimulateInflationAsync();
+            SimulatePriceChangeAsync();
         }
 
         public void AddInstruments(List<IInstrument> instrumentsToAdd)
@@ -62,7 +62,6 @@ namespace Tpum.Data
             productStock.Remove(instrument);
         }
         
-
         public IList<IInstrument> GetAllInstruments()
         {
             return new ReadOnlyCollection<IInstrument>(productStock);
@@ -77,17 +76,20 @@ namespace Tpum.Data
         {
             return productStock.Find(i => i.Id.Equals(productId));
         }
+
         private void OnConsumerFundsChanged(decimal funds)
         {
             EventHandler<ChangeConsumerFundsEventArgs> handler = ConsumerFundsChange;
             handler?.Invoke(this, new ChangeConsumerFundsEventArgs(funds));
         }
+
         private void OnQuantityChanged(Guid id, int quantity)
         {
             EventHandler<ChangeProductQuantityEventArgs> handler = ProductQuantityChange;
             handler?.Invoke(this, new ChangeProductQuantityEventArgs(id, quantity));
         }
-        private async Task SimulateInflationAsync()
+
+        private async Task SimulatePriceChangeAsync()
         {
             var random = new Random();
             while (true)
@@ -106,7 +108,7 @@ namespace Tpum.Data
                 }
 
                 // Notify listeners of the inflation change
-                PriceInflationChange?.Invoke(this, new ChangePriceInflationEventArgs(inflationRate));
+                PriceChange?.Invoke(this, new ChangePriceEventArgs(inflationRate));
 
             }
         }

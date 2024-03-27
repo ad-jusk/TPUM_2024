@@ -6,7 +6,7 @@ namespace Tpum.Data.Interfaces
     {
         public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangePriceInflationEventArgs> PriceInflationChange;
+        public event EventHandler<ChangePriceEventArgs> PriceChange;
 
         public void AddInstruments(List<IInstrument> instrumentsToAdd);
         public void AddInstrument(IInstrument instrument);

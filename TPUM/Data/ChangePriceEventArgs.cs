@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace Tpum.Data
 {
-    public class ChangePriceInflationEventArgs : EventArgs
+    public class ChangePriceEventArgs : EventArgs
     {
         public decimal NewFunds { get; }
 
-        public ChangePriceInflationEventArgs(decimal newFunds)
+        public ChangePriceEventArgs(decimal newFunds)
         {
             this.NewFunds = newFunds;
         }

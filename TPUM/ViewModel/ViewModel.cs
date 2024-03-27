@@ -1,7 +1,6 @@
 ﻿using GalaSoft.MvvmLight.Command;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using Tpum.Data.Enums;
@@ -13,27 +12,21 @@ namespace Tpum.Presentation.ViewModel
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private ObservableCollection<InstrumentPresentation> instruments;
-        private string mainViewVisibility;
-        private readonly Timer timer;
         private readonly Model.Model model;
-        private string priceInflation;
         private float customerFunds;
-        private string categoryChosen;
+
         public ViewModel()
         {
             this.model = new Model.Model();
             this.instruments = new ObservableCollection<InstrumentPresentation>(this.model.GetInstruments());
-            this.mainViewVisibility = "a"; // model.MainViewVisibility;
             InstrumentButtonClick = new RelayCommand<Guid>((id) => InstrumentButtonClickHandler(id));
             StringButton = new RelayCommand<Guid>((id) => StringButtonClickHandler());
             WindButton = new RelayCommand<Guid>((id) => WindButtonClickHandler());
             PercussionButton = new RelayCommand<Guid>((id) => PercussionButtonClickHandler());
             model.Store.ProductQuantityChange += OnQuantityChanged;
             model.Store.ConsumerFundsChange += OnConsumerFundsChanged;
-            model.Store.PriceInflationChange += HandlePriceInflationChanged;
+            model.Store.PriceChange += HandlePriceInflationChanged;
             customerFunds = 120700.0f;
-            categoryChosen = "";
-            Assembly assembly = Assembly.GetExecutingAssembly();
         }
 
         public ICommand StringButton { get; private set; }
@@ -54,30 +47,6 @@ namespace Tpum.Presentation.ViewModel
                 OnPropertyChanged("Instruments");
             }
         }
-        public string MainViewVisibility
-        {
-            get { return mainViewVisibility; }
-            set
-            {
-                if (value.Equals(mainViewVisibility))
-                    return;
-                mainViewVisibility = value;
-                OnPropertyChanged("MainViewVisibility");
-            }
-        }
-        public string PriceInflation
-        {
-            get { return priceInflation; }
-            set
-            {
-                if (value != priceInflation)
-                {
-                    priceInflation = value;
-                    OnPropertyChanged();
-                }
-
-            }
-        }
 
         public float CustomerFunds
         {
@@ -92,60 +61,41 @@ namespace Tpum.Presentation.ViewModel
 
             }
         }
-        private void HandlePriceInflationChanged(object sender, ChangePriceInflationEventArgs args)
+
+        private void HandlePriceInflationChanged(object sender, ChangePriceEventArgs args)
         {
-            priceInflation = $"{args.NewFunds}";
-             Instruments.Clear();
-            if (categoryChosen!="")
-            {
-                foreach (InstrumentPresentation instrument in model.Store.GetInstruments())
-                {
-                    if (instrument.Category.Equals(categoryChosen))
-                        Instruments.Add(instrument);
-                }
-            }
-            else
-            {
-                foreach (InstrumentPresentation instrument in model.Store.GetInstruments())
-                {
-                    Instruments.Add(instrument);
-                }
-            }
+            List<InstrumentPresentation> displayed = new List<InstrumentPresentation>(Instruments);
+            List<InstrumentPresentation> all = model.Store.GetInstruments();
 
+            Instruments.Clear();
 
-
+            all
+                .Where(i =>  displayed.Contains(i))
+                .ToList()
+                .ForEach(i => Instruments.Add(i));
         }
+
         private void StringButtonClickHandler()
         {
             Instruments.Clear();
-            categoryChosen = "String";
-            foreach (InstrumentPresentation instrument in model.Store.GetInstruments())
-            {
-                if (instrument.Category.Equals(categoryChosen))
-                    Instruments.Add(instrument);
-            }
+            model.Store.GetInstrumentsByCategory(InstrumentCategory.String)
+                .ForEach(i => Instruments.Add(i));
         }
+
         private void WindButtonClickHandler()
         {
             Instruments.Clear();
-            categoryChosen = "Wind";
-            foreach (InstrumentPresentation instrument in model.Store.GetInstruments())
-            {
-                if (instrument.Category.Equals(categoryChosen))
-                    Instruments.Add(instrument);
-            }
+            model.Store.GetInstrumentsByCategory(InstrumentCategory.Wind)
+                .ForEach(i => Instruments.Add(i));
         }
 
         private void PercussionButtonClickHandler()
         {
             Instruments.Clear();
-            categoryChosen = "Percussion";
-            foreach (InstrumentPresentation instrument in model.Store.GetInstruments())
-            {
-                if (instrument.Category.Equals(categoryChosen))
-                    Instruments.Add(instrument);
-            }
+            model.Store.GetInstrumentsByCategory(InstrumentCategory.Percussion)
+                .ForEach(i => Instruments.Add(i));
         }
+
         private void InstrumentButtonClickHandler(Guid id)
         {
             int i = 0;
@@ -177,6 +127,7 @@ namespace Tpum.Presentation.ViewModel
             newInstruments[instrumentIndex].Quantity = e.Quantity;
             Instruments = new ObservableCollection<InstrumentPresentation>(newInstruments);
         }
+
         private void OnConsumerFundsChanged(object sender, Tpum.Presentation.Model.ChangeConsumerFundsEventArgs e)
         {
             CustomerFunds = (float)e.Funds;
