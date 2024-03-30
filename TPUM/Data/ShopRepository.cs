@@ -137,7 +137,7 @@ namespace Tpum.Data
             // TODO
         }
 
-            private void OnConsumerFundsChanged(decimal funds)
+        private void OnConsumerFundsChanged(decimal funds)
         {
             EventHandler<ChangeConsumerFundsEventArgs> handler = ConsumerFundsChange;
             handler?.Invoke(this, new ChangeConsumerFundsEventArgs(funds));

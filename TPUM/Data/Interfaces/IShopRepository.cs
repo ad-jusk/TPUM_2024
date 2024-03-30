@@ -16,6 +16,9 @@ namespace Tpum.Data.Interfaces
         public IInstrument? GetInstrumentById(Guid productId);
         public decimal GetConsumerFunds();
         public void ChangeConsumerFunds(Guid instrumentId); 
-        public void DecrementInstrumentQuantity(Guid instrumentId); 
+        public void DecrementInstrumentQuantity(Guid instrumentId);
+        public Task Connect(Uri uri);
+        public Task SendMessage(string message);
+
     }
 }
