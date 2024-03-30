@@ -1,11 +1,9 @@
 ﻿using System.Collections.ObjectModel;
-using Tpum.Data.Enums;
-using Tpum.Data.Interfaces;
-using Tpum.Data.DataModels;
-using Tpum.Data.WebSocket;
-using System;
+using Tpum.ServerData.Enums;
+using Tpum.ServerData.Interfaces;
+using Tpum.ServerData.DataModels;
 
-namespace Tpum.Data
+namespace Tpum.ServerData
 {
     internal class ShopRepository : IShopRepository
     {
@@ -13,9 +11,8 @@ namespace Tpum.Data
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
         public event EventHandler<ChangePriceEventArgs> PriceChange;
         private readonly List<IInstrument> productStock;
-        private List<IObserver<IInstrument>> observers;
         private decimal consumerFunds;
-        private WebSocketConnection connection = null;
+
         public ShopRepository() 
         {
             productStock = [
@@ -28,42 +25,8 @@ namespace Tpum.Data
                 new Instrument("Tamburyn", InstrumentCategory.Percussion, 200, 2018, 5),
                 new Instrument("Bęben", InstrumentCategory.Percussion, 800, 2018, 5),
             ];
-            productStock = new List<IInstrument>();
-            observers = new List<IObserver<IInstrument>>();
             consumerFunds = 120000M;
             SimulatePriceChangeAsync();
-        }
-
-        public IDisposable Subscribe(IObserver<IInstrument> observer)
-        {
-            if (!observers.Contains(observer))
-                observers.Add(observer);
-            return new Unsubscriber(observers, observer);
-        }
-        public async Task Connect(Uri uri)
-        {
-            try
-            {
-                connection = await WebSocketClient.Connect(uri, log => { });
-                if (connection != null)
-                {
-                    connection.onMessage = ParseMessage;
-                    await SendMessage("RequestInstruments");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Connection error: {ex.Message}");
-            }
-        }
-
-        public async Task SendMessage(string message)
-        {
-            if (connection != null)
-            {
-                Console.WriteLine($"Server: Sending message {message}");
-                await connection.SendAsync(message);
-            }
         }
 
         public void AddInstruments(List<IInstrument> instrumentsToAdd)
@@ -74,25 +37,8 @@ namespace Tpum.Data
         public void AddInstrument(IInstrument instrument)
         {
             productStock.Add(instrument);
-            
-            // Notify observers about changes
-            foreach (var observer in observers)
-            {
-                observer.OnNext(instrument);
-            }
         }
-        public void RemoveInstrument(IInstrument instrument)
-        {
-            IInstrument instrumentToRemove = productStock.Find(x => x.Id == instrument.Id);
-            if (instrument == null)
-                return; 
-            productStock.Remove(instrument);
-            
-            foreach (var observer in observers)
-            {
-                observer.OnNext(instrument);
-            }
-        }
+
         public decimal GetConsumerFunds()
         {
             return consumerFunds;
@@ -118,6 +64,11 @@ namespace Tpum.Data
             }
         }
 
+        public void RemoveInstrument(IInstrument instrument)
+        {
+            productStock.Remove(instrument);
+        }
+        
         public IList<IInstrument> GetAllInstruments()
         {
             return new ReadOnlyCollection<IInstrument>(productStock);
@@ -132,12 +83,8 @@ namespace Tpum.Data
         {
             return productStock.Find(i => i.Id.Equals(productId));
         }
-        private void ParseMessage(string message)
-        {
-            // TODO
-        }
 
-            private void OnConsumerFundsChanged(decimal funds)
+        private void OnConsumerFundsChanged(decimal funds)
         {
             EventHandler<ChangeConsumerFundsEventArgs> handler = ConsumerFundsChange;
             handler?.Invoke(this, new ChangeConsumerFundsEventArgs(funds));
@@ -172,6 +119,5 @@ namespace Tpum.Data
 
             }
         }
-
     }
 }

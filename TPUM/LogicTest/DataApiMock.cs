@@ -91,5 +91,10 @@ namespace LogicTest
                 consumerFunds -= i.Price;
             }
         }
+
+        public IDisposable Subscribe(IObserver<IInstrument> observer)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

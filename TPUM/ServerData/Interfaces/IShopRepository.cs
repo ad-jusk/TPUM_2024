@@ -1,8 +1,8 @@
-﻿using Tpum.Data.Enums;
+﻿using Tpum.ServerData.Enums;
 
-namespace Tpum.Data.Interfaces
+namespace Tpum.ServerData.Interfaces
 {
-    public interface IShopRepository : IObservable<IInstrument>
+    public interface IShopRepository
     {
         public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
