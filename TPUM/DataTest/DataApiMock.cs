@@ -1,9 +1,14 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Tpum.Data;
 using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
 
-namespace LogicTest
+namespace DataTest
 {
     public class DataApiMock : DataAbstractApi
     {
@@ -13,6 +18,26 @@ namespace LogicTest
         {
             return shopRepository;
         }
+    }
+
+    public class InstrumentMock : IInstrument
+    {
+        public InstrumentMock(string name, InstrumentCategory category, decimal price, int year, int quantity)
+        {
+            Id = Guid.NewGuid();
+            Name = name;
+            Category = category;
+            Price = price;
+            Year = year;
+            Quantity = quantity;
+        }
+
+        public Guid Id { get; }
+        public string Name { get; }
+        public InstrumentCategory Category { get; set; }
+        public decimal Price { get; set; }
+        public int Year { get; set; }
+        public int Quantity { get; set; }
     }
 
     public class ShopRepositoryMock : IShopRepository
@@ -28,8 +53,14 @@ namespace LogicTest
         {
             this.instrumentStock = new List<IInstrument>()
             {
-                new InstrumentMock("instrument1", InstrumentCategory.String, 0M, 10, 10),
-                new InstrumentMock("instrument2", InstrumentCategory.Percussion, 0M, 10, 10)
+                new InstrumentMock("Pianino", InstrumentCategory.String, 5000, 2014, 10),
+                new InstrumentMock("Fortepian", InstrumentCategory.String, 6000, 2014, 10),
+                new InstrumentMock("Gitara", InstrumentCategory.String, 2200, 2020, 20),
+                new InstrumentMock("Trąbka", InstrumentCategory.Wind, 1500, 2018, 5),
+                new InstrumentMock("Flet", InstrumentCategory.Wind, 1100, 2018, 5),
+                new InstrumentMock("Harmonijka", InstrumentCategory.Wind, 900, 2018, 5),
+                new InstrumentMock("Tamburyn", InstrumentCategory.Percussion, 200, 2018, 5),
+                new InstrumentMock("Bęben", InstrumentCategory.Percussion, 800, 2018, 5),
             };
             this.consumerFunds = 1000000M;
         }
@@ -46,7 +77,11 @@ namespace LogicTest
 
         public void ChangeConsumerFunds(Guid instrumentId, decimal instrumentPrice)
         {
-            throw new NotImplementedException();
+            IInstrument? instrument = instrumentStock.Find(i => i.Id.Equals(instrumentId));
+            if (instrument != null && instrument.Price > 0 && instrument.Quantity > 0)
+            {
+                consumerFunds -= instrument.Price;
+            }
         }
 
         public void DecrementInstrumentQuantity(Guid instrumentId)
@@ -70,7 +105,7 @@ namespace LogicTest
 
         public IList<IInstrument> GetInstrumentsByCategory(InstrumentCategory category)
         {
-            throw new NotImplementedException();
+            return new ReadOnlyCollection<IInstrument>(instrumentStock.Where(i => i.Category == category).ToList());
         }
 
         public void RemoveInstrument(IInstrument instrument)
@@ -85,7 +120,7 @@ namespace LogicTest
 
         public void ChangeConsumerFunds(Guid instrumentId)
         {
-            IInstrument? i = instrumentStock.Find(i => i.Equals(instrumentId));
+            IInstrument? i = instrumentStock.Find(i => i.Id.Equals(instrumentId));
             if (i != null)
             {
                 consumerFunds -= i.Price;

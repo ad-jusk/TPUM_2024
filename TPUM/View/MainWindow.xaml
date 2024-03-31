@@ -8,7 +8,7 @@
         xmlns:converters="clr-namespace:Tpum.Presentation.View"
         mc:Ignorable="d"
         ResizeMode="NoResize"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Sklep" Height="450" Width="800">
 
     <Window.DataContext>
         <viewmodel:ViewModel/>
@@ -19,7 +19,7 @@
 
     <Grid>
         <Rectangle HorizontalAlignment="Left" Height="431" VerticalAlignment="Center" Width="170" Fill="#FF634AE7" Stroke="#FF634AE7"/>
-        <Canvas Width="800" Height="450" x:Name="Sklep">
+        <Canvas Width="800" Height="450">
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Vertical" Width="150" Height="400" Margin="10 10 10 10">
                     <Button Content="Wszystkie" MinHeight="40" MinWidth="150" Margin="0 0" Command= "{Binding AllButton}" Background="{x:Null}" BorderBrush="White" Foreground="White"/>

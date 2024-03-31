@@ -4,7 +4,7 @@ namespace Tpum.Data
 {
     public abstract class DataAbstractApi
     {
-        public static DataApi Create()
+        public static DataAbstractApi Create()
         {
             return new DataApi();
         }

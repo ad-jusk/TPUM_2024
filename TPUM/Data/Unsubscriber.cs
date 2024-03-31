@@ -7,12 +7,12 @@ using Tpum.Data.Interfaces;
 
 namespace Tpum.Data
 {
-    private class Unsubscriber : IDisposable
+    internal class Unsubscriber : IDisposable
     {
-        private List<IObserver<IFruit>> _observers;
-        private IObserver<IFruit> _observer;
+        private List<IObserver<IInstrument>> _observers;
+        private IObserver<IInstrument> _observer;
 
-        public Unsubscriber(List<IObserver<IFruit>> observers, IObserver<IFruit> observer)
+        public Unsubscriber(List<IObserver<IInstrument>> observers, IObserver<IInstrument> observer)
         {
             this._observers = observers;
             this._observer = observer;

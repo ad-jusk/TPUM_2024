@@ -3,7 +3,7 @@ using Tpum.Data.WebSocket;
 
 namespace Tpum.Data
 {
-    public class DataApi : DataAbstractApi
+    internal class DataApi : DataAbstractApi
     {
         private readonly IShopRepository shopRepository;
 

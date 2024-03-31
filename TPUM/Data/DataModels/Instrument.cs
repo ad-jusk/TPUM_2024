@@ -1,15 +1,28 @@
-﻿using Tpum.Data.Enums;
+﻿using System.Text.Json.Serialization;
+using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
 
 namespace Tpum.Data.DataModels
 {
     public class Instrument : IInstrument
     {
-        public Instrument(string instrumentName, InstrumentCategory instrumentCategory, decimal instrumentPrice, int year, int quantity)
+
+        [JsonConstructor]
+        public Instrument(string name, Guid id, InstrumentCategory category, decimal price, int year, int quantity)
         {
-            Name = instrumentName;
-            Category = instrumentCategory;
-            Price = instrumentPrice;
+            Name = name;
+            Id = id;
+            Category = category;
+            Price = price;
+            Year = year;
+            Quantity = quantity;
+        }
+
+        public Instrument(string name, InstrumentCategory category, decimal price, int year, int quantity)
+        {
+            Name = name;
+            Category = category;
+            Price = price;
             Year = year;
             Quantity = quantity;
         }

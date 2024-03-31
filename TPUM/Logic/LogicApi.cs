@@ -4,7 +4,7 @@ using Tpum.Logic.Interfaces;
 
 namespace Tpum.Logic
 {
-    public class LogicApi : LogicAbstractApi
+    internal class LogicApi : LogicAbstractApi
     {
         private readonly IStore store;
 

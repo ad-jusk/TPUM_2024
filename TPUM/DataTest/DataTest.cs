@@ -10,7 +10,7 @@ namespace DataTest
     {
         private static DataAbstractApi PrepareDataLayer()
         {
-            return DataAbstractApi.Create();
+            return new DataApiMock();
         }
 
         [TestMethod]
