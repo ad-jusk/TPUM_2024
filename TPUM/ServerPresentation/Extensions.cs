@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Tpum.ServerPresentation
+namespace ServerPresentation
 {
     internal static class Extensions
     {

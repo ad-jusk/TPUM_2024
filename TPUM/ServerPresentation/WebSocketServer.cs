@@ -5,15 +5,18 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Tpum.ServerPresentation
+namespace ServerPresentation
 {
     public static class WebSocketServer
     {
+        public static WebSocketConnection CurrentConnection { get; set; }
+
         public static async Task Server(int p2pPort, Action<WebSocketConnection> onWebSocketConnection)
         {
             Uri uri = new Uri($@"http://localhost:{p2pPort}/");
             await ServerLoop(uri, onWebSocketConnection);
         }
+
         private static async Task ServerLoop(Uri uri, Action<WebSocketConnection> onWebSocketConnection)
         {
             HttpListener server = new HttpListener();
@@ -22,7 +25,7 @@ namespace Tpum.ServerPresentation
             while (true)
             {
                 HttpListenerContext httpContext = await server.GetContextAsync();
-                if(!httpContext.Request.IsWebSocketRequest)
+                if (!httpContext.Request.IsWebSocketRequest)
                 {
                     httpContext.Response.StatusCode = 400;
                     httpContext.Response.Close();
@@ -48,10 +51,12 @@ namespace Tpum.ServerPresentation
             {
                 return _serverWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown procedure started", CancellationToken.None);
             }
+
             public override string ToString()
             {
                 return _remoteEndPoint.ToString();
             }
+
             protected override Task SendTask(string message)
             {
                 return _serverWebSocket.SendAsync(message.GetArraySegment(), WebSocketMessageType.Text, true, CancellationToken.None);

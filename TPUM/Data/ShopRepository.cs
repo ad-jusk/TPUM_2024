@@ -4,6 +4,8 @@ using Tpum.Data.Interfaces;
 using Tpum.Data.DataModels;
 using Tpum.Data.WebSocket;
 using System;
+using Data.WebSocket;
+using Data;
 
 namespace Tpum.Data
 {
@@ -13,27 +15,17 @@ namespace Tpum.Data
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
         public event EventHandler<ChangePriceEventArgs> PriceChange;
         private readonly List<IInstrument> productStock;
-        private List<IObserver<IInstrument>> observers;
+        private readonly List<IObserver<IInstrument>> observers;
         private decimal consumerFunds;
-        private WebSocketConnection connection = null;
+        private readonly ConnectionService connectionService;
 
         public ShopRepository() 
         {
-            // THIS IS COMMENTED BECAUSE DATA WILL BE RETRIEVED FROM SERVER
-/*            productStock = [
-                new Instrument("Pianino", InstrumentCategory.String, 5000, 2014, 10),
-                new Instrument("Fortepian", InstrumentCategory.String, 6000, 2014, 10),
-                new Instrument("Gitara", InstrumentCategory.String, 2200, 2020, 20),
-                new Instrument("Trąbka", InstrumentCategory.Wind, 1500, 2018, 5),
-                new Instrument("Flet", InstrumentCategory.Wind, 1100, 2018, 5),
-                new Instrument("Harmonijka", InstrumentCategory.Wind, 900, 2018, 5),
-                new Instrument("Tamburyn", InstrumentCategory.Percussion, 200, 2018, 5),
-                new Instrument("Bęben", InstrumentCategory.Percussion, 800, 2018, 5),
-            ];*/
             productStock = new List<IInstrument>();
             observers = new List<IObserver<IInstrument>>();
             consumerFunds = 120000M;
-            SimulatePriceChangeAsync();
+            connectionService = new ConnectionService();
+            Connect(new Uri("ws://localhost:8080"));
         }
 
         public IDisposable Subscribe(IObserver<IInstrument> observer)
@@ -47,11 +39,15 @@ namespace Tpum.Data
         {
             try
             {
-                connection = await WebSocketClient.Connect(uri, log => { });
-                if (connection != null)
+                bool connected = await connectionService.Connect(uri);
+                if (connected)
                 {
-                    connection.onMessage = ParseMessage;
+                    connectionService.Connection.onMessage = ParseMessage;
                     await SendMessage("RequestInstruments");
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to connect with {uri}");
                 }
             }
             catch (Exception ex)
@@ -62,16 +58,11 @@ namespace Tpum.Data
 
         public async Task SendMessage(string message)
         {
-            if (connection != null)
+            if (connectionService.Connected)
             {
                 Console.WriteLine($"Server: Sending message {message}");
-                await connection.SendAsync(message);
+                await connectionService.Connection.SendAsync(message);
             }
-        }
-
-        public void AddInstruments(List<IInstrument> instrumentsToAdd)
-        {
-            productStock.AddRange(instrumentsToAdd);
         }
 
         public void AddInstrument(IInstrument instrument)
@@ -140,7 +131,15 @@ namespace Tpum.Data
 
         private void ParseMessage(string message)
         {
-            // TODO
+            if (message.StartsWith("UpdateAll"))
+            {
+                string json = message.Substring("UpdateAll".Length);
+                List<IInstrument> instruments = Serializer.JSONToInstruments(json);
+                foreach (var instrument in instruments)
+                {
+                    AddInstrument(instrument);
+                }
+            }
         }
 
         private void OnConsumerFundsChanged(decimal funds)

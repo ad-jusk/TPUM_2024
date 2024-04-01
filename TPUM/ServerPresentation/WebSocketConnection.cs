@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Tpum.ServerPresentation.WebSocket
+namespace ServerPresentation
 {
     public abstract class WebSocketConnection
     {

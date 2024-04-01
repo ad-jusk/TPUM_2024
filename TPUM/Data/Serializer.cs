@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Tpum.Data.DataModels;
 using Tpum.Data.Interfaces;
 
@@ -6,17 +7,17 @@ namespace Data
 {
     internal abstract class Serializer
     {
-        public static string WeaponToJSON(IInstrument instrument)
+        public static string InstrumentToJSON(IInstrument instrument)
         {
             return JsonSerializer.Serialize(instrument);
         }
 
-        public static IInstrument JSONToWeapon(string json)
+        public static IInstrument JSONToInstrument(string json)
         {
             return JsonSerializer.Deserialize<Instrument>(json)!;
         }
 
-        public static string WarehouseToJSON(List<IInstrument> weapons)
+        public static string InstrumentsToJSON(List<IInstrument> weapons)
         {
             return JsonSerializer.Serialize(weapons);
         }

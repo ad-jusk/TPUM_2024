@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace Tpum.Data.WebSocket
 {
-    public static class WebSocketClient
+    internal class WebSocketClient
     {
+
         public static async Task<WebSocketConnection> Connect(Uri peer, Action<string> log)
         {
             ClientWebSocket clientWebSocket = new ClientWebSocket();
@@ -33,6 +34,7 @@ namespace Tpum.Data.WebSocket
             private ClientWebSocket _clientWebSocket;
             private Uri _peer;
             private readonly Action<string> _log;
+
             public ClientWebSocketConnection(ClientWebSocket clientWebSocket, Uri peer, Action<string> log)
             { 
                 _clientWebSocket = clientWebSocket;
@@ -40,14 +42,17 @@ namespace Tpum.Data.WebSocket
                 _log = log;
                 Task.Factory.StartNew(() => ClientMessageLoop());
             }
+
             public override Task DisconnectAsync()
             {
                 return _clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown procedure started", CancellationToken.None);
             }
+
             public override string ToString()
             {
                 return _peer.ToString();
             }
+
             protected override Task SendTask(string message)
             {
                 return _clientWebSocket.SendAsync(message.GetArraySegment(), WebSocketMessageType.Text, true, CancellationToken.None);

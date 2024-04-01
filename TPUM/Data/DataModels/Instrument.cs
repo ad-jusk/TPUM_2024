@@ -29,6 +29,8 @@ namespace Tpum.Data.DataModels
 
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public InstrumentCategory Category { get; set; }
         public decimal Price { get; set; }
         public int Year { get; set; }

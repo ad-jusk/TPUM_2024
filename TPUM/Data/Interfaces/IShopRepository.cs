@@ -8,7 +8,6 @@ namespace Tpum.Data.Interfaces
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
         public event EventHandler<ChangePriceEventArgs> PriceChange;
 
-        public void AddInstruments(List<IInstrument> instrumentsToAdd);
         public void AddInstrument(IInstrument instrument);
         public void RemoveInstrument(IInstrument instrument);
         public IList<IInstrument> GetAllInstruments();
