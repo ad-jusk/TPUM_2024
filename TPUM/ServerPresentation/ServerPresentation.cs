@@ -40,7 +40,7 @@ namespace Tpum.ServerPresentation
         private async Task SendAllInstruments()
         {
             var weapons = store.GetAvailableInstruments();
-            var json = Serializer.WarehouseToJSON(weapons);
+            var json = Serializer.InstrumentsToJSON(weapons);
             var message = "UpdateAll" + json;
             await SendMessageAsync(message);
         }

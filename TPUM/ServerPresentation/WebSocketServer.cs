@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ServerPresentation
 {
-    public static class WebSocketServer
+    internal static class WebSocketServer
     {
         public static WebSocketConnection CurrentConnection { get; set; }
 

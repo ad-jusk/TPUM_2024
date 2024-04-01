@@ -10,22 +10,22 @@ namespace ServerPresentation
 {
     internal class Serializer
     {
-        internal static string WeaponToJSON(InstrumentDTO weapon)
+        internal static string InstrumentToJSON(InstrumentDTO weapon)
         {
             return JsonSerializer.Serialize(weapon);
         }
 
-        internal static InstrumentDTO JSONToWeapon(string json)
+        internal static InstrumentDTO JSONToInstrument(string json)
         {
             return JsonSerializer.Deserialize<InstrumentDTO>(json)!;
         }
 
-        internal static string WarehouseToJSON(List<InstrumentDTO> weapons)
+        internal static string InstrumentsToJSON(List<InstrumentDTO> weapons)
         {
             return JsonSerializer.Serialize(weapons);
         }
 
-        internal static List<InstrumentDTO> JSONToWarehouse(string json)
+        internal static List<InstrumentDTO> JSONToInstruments(string json)
         {
             return new List<InstrumentDTO>(JsonSerializer.Deserialize<List<InstrumentDTO>>(json)!);
         }
