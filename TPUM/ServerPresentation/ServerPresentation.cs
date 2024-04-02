@@ -35,6 +35,21 @@ namespace Tpum.ServerPresentation
 
             if (message == "RequestInstruments")
                 await SendAllInstruments();
+            else if (message.StartsWith("CustomMessage"))
+            {
+                // Handle custom message
+            }
+            if (message.Contains("RequestTransaction"))
+            {
+                var json = message.Substring("RequestTransaction".Length);
+                var instrumentToBuy = Serializer.JSONToInstrument(json);
+                bool sellResult = store.SellInstrument(instrumentToBuy);
+                int sellResultInt = sellResult ? 1 : 0;
+                var instrument = store.GetInstrumentById(instrumentToBuy.Id);
+                json = Serializer.InstrumentToJSON(instrument);
+
+                await SendMessageAsync("TransactionResult" + sellResultInt.ToString() + (sellResult ? json : ""));
+            }
         }
 
         private async Task SendAllInstruments()
@@ -58,11 +73,21 @@ namespace Tpum.ServerPresentation
             store = logic.GetStore();
 
             //TODO: EVENTS
-/*            store.PriceChange += async (sender, eventArgs) =>
+            store.PriceChange += async (sender, eventArgs) =>
             {
-                if (WebSocketServer.CurrentConnection != null)
-                    await SendMessageAsync("PriceChanged" + eventArgs.NewFunds.ToString() + "/" + eventArgs.Id.ToString());
-            };*/
+                try
+                {
+                    if (WebSocketServer.CurrentConnection != null)
+                        await SendMessageAsync("PriceChanged" + eventArgs.NewFunds.ToString());
+                    else
+                        await SendMessageAsync("connection is null");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("[Server]: Error sending price change message: " + ex.Message);
+                }
+            };
+
             await WebSocketServer.Server(8080, ConnectionHandler);
         }
     }

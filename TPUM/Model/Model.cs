@@ -1,5 +1,6 @@
 ﻿using Logic;
 using Tpum.Data.Enums;
+using Tpum.Logic;
 
 namespace Tpum.Presentation.Model
 {
@@ -19,7 +20,7 @@ namespace Tpum.Presentation.Model
             return Store.GetInstruments();
         }
 
-        public List<InstrumentPresentation> GetInstrumentsByCategory(InstrumentCategory category)
+        public List<InstrumentPresentation> GetInstrumentsByCategory(string category)
         {
             return Store.GetInstrumentsByCategory(category);
         }
@@ -28,7 +29,10 @@ namespace Tpum.Presentation.Model
         {
             return Store.GetInstrumentById(Id);
         }
-
+        public async Task SellInstrument(InstrumentPresentation instrument)
+        {
+            Store.SellInstrument(instrument);
+        }
         public void DecrementInstrumentQuantity(Guid instrumentId)
         {
             Store.DecrementInstrumentQuantity(instrumentId);

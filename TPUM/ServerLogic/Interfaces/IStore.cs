@@ -8,6 +8,7 @@ namespace Tpum.ServerLogic.Interfaces
 
         public List<InstrumentDTO> GetInstrumentsByCategory(InstrumentCategory category);
 
+        public bool SellInstrument(InstrumentDTO instrument);
         public InstrumentDTO GetInstrumentById(Guid id);
 
         public void DecrementInstrumentQuantity(Guid instrumentId);

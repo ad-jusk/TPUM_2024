@@ -39,6 +39,13 @@ namespace Tpum.ServerLogic
                 .ToList();
         }
 
+        public bool SellInstrument(InstrumentDTO instrument)
+        {
+            if (instrument == null) return false;
+            DecrementInstrumentQuantity(instrument.Id);
+            ChangeConsumerFunds(instrument.Id);
+            return true;
+        }
         public decimal GetConsumerFunds()
         {
             return shopRepository.GetConsumerFunds();

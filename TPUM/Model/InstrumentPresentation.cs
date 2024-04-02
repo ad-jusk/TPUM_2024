@@ -25,7 +25,7 @@ namespace Tpum.Presentation.Model
             Quantity = instrument.Quantity;
         }
         public Guid Id { get; } = Guid.NewGuid();
-        public string Name { get; }
+        public string Name { get; set; }
         public string Category { get; set; }
         public decimal Price { get; set; }
         public int Year { get; set; }

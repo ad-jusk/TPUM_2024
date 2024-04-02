@@ -1,4 +1,5 @@
 ﻿
+using Data.WebSocket;
 using Tpum.Data;
 using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
@@ -23,6 +24,7 @@ namespace LogicTest
         public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
         public event EventHandler<ChangePriceEventArgs> PriceChange;
+        public event EventHandler<IInstrument> TransactionSucceeded;
 
         public ShopRepositoryMock()
         {
@@ -68,7 +70,7 @@ namespace LogicTest
             return instrumentStock.Find(i => i.Id.Equals(productId));
         }
 
-        public IList<IInstrument> GetInstrumentsByCategory(InstrumentCategory category)
+        public IList<IInstrument> GetInstrumentsByCategory(string category)
         {
             throw new NotImplementedException();
         }
@@ -102,7 +104,17 @@ namespace LogicTest
             throw new NotImplementedException();
         }
 
-        public Task SendMessage(string message)
+        public Task SendMessageAsync(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IConnectionService GetConnectionService()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task TryBuy(IInstrument instrument)
         {
             throw new NotImplementedException();
         }

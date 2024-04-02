@@ -19,7 +19,7 @@ namespace Tpum.ServerLogic
 
         public Guid Id { get; private set; }
         public string Name { get; private set; }
-        public string Category { get; private set; }
+        public string Category { get;  set; }
         public decimal Price { get; private set; }
         public int Year { get; private set; }
         public int Quantity { get; private set; }

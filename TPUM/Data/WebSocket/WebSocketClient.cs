@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tpum.Data.WebSocket
 {
-    internal class WebSocketClient
+    public class WebSocketClient
     {
 
         public static async Task<WebSocketConnection> Connect(Uri peer, Action<string> log)

@@ -137,7 +137,7 @@ namespace DataTest
             throw new NotImplementedException();
         }
 
-        public Task SendMessage(string message)
+        public Task SendMessageAsync(string message)
         {
             throw new NotImplementedException();
         }

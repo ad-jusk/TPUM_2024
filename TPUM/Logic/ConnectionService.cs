@@ -6,8 +6,9 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 using Tpum.Data.WebSocket;
+using Tpum.Logic.WebSocket;
 
-namespace Data.WebSocket
+namespace Tpum.Logic
 {
     public class ConnectionService : IConnectionService
     {
