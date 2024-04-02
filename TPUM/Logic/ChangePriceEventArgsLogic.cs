@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Tpum.Logic;
+using Tpum.Data;
 
-namespace Tpum.Presentation.Model
+namespace Tpum.Logic
 {
-    public class ChangePriceEventArgs : EventArgs
+    public class ChangePriceEventArgsLogic : EventArgs
     {
         public float NewPrice { get; }
 
-        public ChangePriceEventArgs(float newPrice)
+        public ChangePriceEventArgsLogic(float newPrice)
         {
             this.NewPrice = newPrice;
         }
 
-        internal ChangePriceEventArgs(ChangePriceEventArgsLogic args)
+        internal ChangePriceEventArgsLogic(ChangePriceEventArgs args)
         {
             this.NewPrice = args.NewPrice;
         }

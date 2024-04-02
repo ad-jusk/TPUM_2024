@@ -7,13 +7,13 @@ using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 
-namespace ServerPresentation
+namespace ClientData
 {
     internal class Serializer
     {
         internal static string Serialize<T>(T objectToSerialize)
         {
-            return JsonSerializer.Serialize(objectToSerialize, new JsonSerializerOptions { TypeInfoResolver = new DefaultJsonTypeInfoResolver() });
+            return JsonSerializer.Serialize(objectToSerialize, new JsonSerializerOptions { TypeInfoResolver = new DefaultJsonTypeInfoResolver()});
         }
 
         internal static T Deserialize<T>(string message)

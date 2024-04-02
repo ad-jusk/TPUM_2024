@@ -8,11 +8,11 @@ namespace Tpum.Data
 {
     public class ChangePriceEventArgs : EventArgs
     {
-        public decimal NewFunds { get; }
+        public float NewPrice { get; }
 
-        public ChangePriceEventArgs(decimal newFunds)
+        public ChangePriceEventArgs(float newPrice)
         {
-            this.NewFunds = newFunds;
+            this.NewPrice = newPrice;
         }
     }
 }

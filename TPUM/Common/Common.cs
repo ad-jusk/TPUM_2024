@@ -1,14 +1,19 @@
-﻿namespace Common
+﻿using System.Text.Json.Serialization;
+
+namespace Common
 {
     // CLIENT COMMANDS
 
+    [Serializable]
     public abstract class Command
     {
-        public string Header;
+        public string Header { get; set; }
 
-        protected Command(string header)
+        public Command() { }
+
+        public Command(string header)
         {
-            Header = header;
+            this.Header = header;
         }
     }
 
@@ -31,26 +36,45 @@
 
     // SERVER RESPONSES
 
-    [Serializable]
-    public class UpdateAllResponse
+    public abstract class Response
     {
-        public static readonly string Header = "UpdateAllItems";
+        public string Header { get; private set; }
+
+        private Response() { }
+
+        [JsonConstructor]
+        public Response(string header)
+        {
+            Header = header;
+        }
+    }
+
+    [Serializable]
+    public class UpdateAllResponse : Response
+    {
+        public static readonly string SHeader = "UpdateAllItems";
 
         public InstrumentDTO[]? Items;
+
+        public UpdateAllResponse() : base(SHeader) { }
     }
 
     [Serializable]
-    public class PriceChangedResponse
+    public class PriceChangedResponse : Response
     {
-        public static readonly string Header = "PriceChanged";
+        public static readonly string SHeader = "PriceChanged";
         public NewPriceDTO[]? NewPrices;
+
+        public PriceChangedResponse() : base(SHeader) { }
     }
 
     [Serializable]
-    public class TransactionResponse
+    public class TransactionResponse : Response
     {
-        public static readonly string Header = "TransactionResponse";
+        public static readonly string SHeader = "TransactionResponse";
         public bool Succeeded;
+
+        public TransactionResponse() : base(SHeader) { }
     }
 
     // DTOS

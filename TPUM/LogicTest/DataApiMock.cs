@@ -1,4 +1,5 @@
 ﻿
+using ClientData.Interfaces;
 using Tpum.Data;
 using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
@@ -8,6 +9,11 @@ namespace LogicTest
     public class DataApiMock : DataAbstractApi
     {
         private readonly IShopRepository shopRepository = new ShopRepositoryMock();
+
+        public override IConnectionService GetConnectionService()
+        {
+            throw new NotImplementedException();
+        }
 
         public override IShopRepository GetShopRepository()
         {
@@ -19,19 +25,22 @@ namespace LogicTest
     {
 
         private readonly List<IInstrument> instrumentStock;
-        private decimal consumerFunds;
+        private float consumerFunds;
         public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
         public event EventHandler<ChangePriceEventArgs> PriceChange;
+        public event EventHandler<ChangePriceEventArgs> PriceChanged;
+        public event Action? ItemsUpdated;
+        public event Action<bool>? TransactionFinish;
 
         public ShopRepositoryMock()
         {
             this.instrumentStock = new List<IInstrument>()
             {
-                new InstrumentMock("instrument1", InstrumentCategory.String, 0M, 10, 10),
-                new InstrumentMock("instrument2", InstrumentCategory.Percussion, 0M, 10, 10)
+                new InstrumentMock("instrument1", InstrumentType.String, 0F, 10, 10),
+                new InstrumentMock("instrument2", InstrumentType.Percussion, 0F, 10, 10)
             };
-            this.consumerFunds = 1000000M;
+            this.consumerFunds = 1000000F;
         }
 
         public void AddInstrument(IInstrument instrument)
@@ -68,7 +77,7 @@ namespace LogicTest
             return instrumentStock.Find(i => i.Id.Equals(productId));
         }
 
-        public IList<IInstrument> GetInstrumentsByCategory(InstrumentCategory category)
+        public IList<IInstrument> GetInstrumentsByCategory(InstrumentType category)
         {
             throw new NotImplementedException();
         }
@@ -78,7 +87,7 @@ namespace LogicTest
             throw new NotImplementedException();
         }
 
-        public decimal GetConsumerFunds()
+        public float GetConsumerFunds()
         {
             return consumerFunds;
         }
@@ -90,6 +99,26 @@ namespace LogicTest
             {
                 consumerFunds -= i.Price;
             }
+        }
+
+        public void RequestServerForUpdate()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<IInstrument> GetInstruments()
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<IInstrument> GetInstrumentsByType(InstrumentType type)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SellInstrument(Guid instrumentId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

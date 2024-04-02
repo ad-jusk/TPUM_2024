@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Data\Data.csproj" />
-    <ProjectReference Include="..\Logic\Logic.csproj" />
+    <ProjectReference Include="..\Data\ClientData.csproj" />
+    <ProjectReference Include="..\Logic\ClientLogic.csproj" />
   </ItemGroup>
 
   <ItemGroup>

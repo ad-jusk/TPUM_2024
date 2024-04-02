@@ -53,12 +53,11 @@ namespace ServerPresentation
 
             Console.WriteLine($"New message: {message}");
 
-            if (Serializer.GetHeaderForCommand(message) == GetItemsCommand.SHeader)
+            if (message.Contains(GetItemsCommand.SHeader))
             {
-                GetItemsCommand getItemsCommand = Serializer.Deserialize<GetItemsCommand>(message);
                 await SendItems();
             }
-            else if (Serializer.GetHeaderForCommand(message) == SellItemCommand.SHeader)
+            else if (message.Contains(SellItemCommand.SHeader))
             {
                 SellItemCommand sellItemCommand = Serializer.Deserialize<SellItemCommand>(message);
 

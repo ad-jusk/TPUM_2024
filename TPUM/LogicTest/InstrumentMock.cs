@@ -6,10 +6,10 @@ namespace LogicTest
     public class InstrumentMock : IInstrument
     {
 
-        public InstrumentMock(string name, InstrumentCategory category, decimal price, int year, int quantity) { 
+        public InstrumentMock(string name, InstrumentType category, float price, int year, int quantity) { 
             Id = Guid.NewGuid();
             Name = name;
-            Category = category;
+            Type = category;
             Price = price;
             Year = year;
             Quantity = quantity;
@@ -17,9 +17,10 @@ namespace LogicTest
 
         public Guid Id { get; }
         public string Name { get; }
-        public InstrumentCategory Category { get; set; }
-        public decimal Price { get; set; }
+        public InstrumentType Type { get; set; }
+        public float Price { get; set; }
         public int Year { get; set; }
         public int Quantity { get; set; }
+        float IInstrument.Price { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
     }
 }

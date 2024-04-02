@@ -2,122 +2,153 @@
 using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
 using Tpum.Data.DataModels;
+using ClientData.Interfaces;
+using ClientData;
+using Common;
+using System.ComponentModel;
 
 namespace Tpum.Data
 {
     internal class ShopRepository : IShopRepository
     {
-        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
-        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangePriceEventArgs> PriceChange;
-        private readonly List<IInstrument> productStock;
-        private decimal consumerFunds;
+        public event EventHandler<ChangePriceEventArgs>? PriceChanged;
+        public event Action? ItemsUpdated;
+        public event Action<bool>? TransactionFinish;
 
-        public ShopRepository() 
+        private readonly Dictionary<Guid, IInstrument> items = new Dictionary<Guid, IInstrument>();
+        private readonly object instrumentsLock = new object();
+
+        private readonly IConnectionService connectionService;
+
+        public ShopRepository(IConnectionService connectionService)
         {
-            productStock = [
-                new Instrument("Pianino", InstrumentCategory.String, 5000, 2014, 10),
-                new Instrument("Fortepian", InstrumentCategory.String, 6000, 2014, 10),
-                new Instrument("Gitara", InstrumentCategory.String, 2200, 2020, 20),
-                new Instrument("Trąbka", InstrumentCategory.Wind, 1500, 2018, 5),
-                new Instrument("Flet", InstrumentCategory.Wind, 1100, 2018, 5),
-                new Instrument("Harmonijka", InstrumentCategory.Wind, 900, 2018, 5),
-                new Instrument("Tamburyn", InstrumentCategory.Percussion, 200, 2018, 5),
-                new Instrument("Bęben", InstrumentCategory.Percussion, 800, 2018, 5),
-            ];
-            consumerFunds = 120000M;
-            SimulatePriceChangeAsync();
+            this.connectionService = connectionService;
+            this.connectionService.OnMessage += OnMessage;
         }
 
-        public void AddInstruments(List<IInstrument> instrumentsToAdd)
+        private void OnMessage(string message)
         {
-            productStock.AddRange(instrumentsToAdd);
-        }
 
-        public void AddInstrument(IInstrument instrument)
-        {
-            productStock.Add(instrument);
-        }
-
-        public decimal GetConsumerFunds()
-        {
-            return consumerFunds;
-        }
-
-        public void ChangeConsumerFunds(Guid instrumentId)
-        {
-            IInstrument? instrument = productStock.Find(i => i.Id.Equals(instrumentId));
-            if (instrument != null && instrument.Price > 0 && instrument.Quantity > 0)
+            if (message.Contains(UpdateAllResponse.SHeader))
             {
-                consumerFunds -= instrument.Price;
-                OnConsumerFundsChanged(consumerFunds);
+                UpdateAllResponse response = Serializer.Deserialize<UpdateAllResponse>(message);
+                UpdateAllProducts(response);
             }
-        }
-
-        public void DecrementInstrumentQuantity(Guid instrumentId)
-        {
-            IInstrument? instrument = productStock.Find(i => i.Id.Equals(instrumentId));
-            if (instrument != null && instrument.Quantity > 0)
+            else if (message.Contains(PriceChangedResponse.SHeader))
             {
-                instrument.Quantity -= 1;
-                OnQuantityChanged(instrument.Id, instrument.Quantity);
+                PriceChangedResponse response = Serializer.Deserialize<PriceChangedResponse>(message);
+                UpdateAllPrices(response);
             }
-        }
-
-        public void RemoveInstrument(IInstrument instrument)
-        {
-            productStock.Remove(instrument);
-        }
-        
-        public IList<IInstrument> GetAllInstruments()
-        {
-            return new ReadOnlyCollection<IInstrument>(productStock);
-        }
-
-        public IList<IInstrument> GetInstrumentsByCategory(InstrumentCategory category)
-        {
-            return new ReadOnlyCollection<IInstrument>(productStock.Where(i => i.Category == category).ToList());
-        }
-
-        public IInstrument? GetInstrumentById(Guid productId)
-        {
-            return productStock.Find(i => i.Id.Equals(productId));
-        }
-
-        private void OnConsumerFundsChanged(decimal funds)
-        {
-            EventHandler<ChangeConsumerFundsEventArgs> handler = ConsumerFundsChange;
-            handler?.Invoke(this, new ChangeConsumerFundsEventArgs(funds));
-        }
-
-        private void OnQuantityChanged(Guid id, int quantity)
-        {
-            EventHandler<ChangeProductQuantityEventArgs> handler = ProductQuantityChange;
-            handler?.Invoke(this, new ChangeProductQuantityEventArgs(id, quantity));
-        }
-
-        private async Task SimulatePriceChangeAsync()
-        {
-            var random = new Random();
-            while (true)
+            else if (message.Contains(TransactionResponse.SHeader))
             {
-                // Wait for a random duration between 7 to 10 seconds
-                int waitMilliseconds = random.Next(7000, 10000);
-                await Task.Delay(waitMilliseconds);
-
-                // Calculate a random inflation rate between 0.8 and 1.2
-                decimal inflationRate = (decimal)random.NextDouble()*(1.2m - 0.8m) + 0.8m;
-
-                // Apply inflation to all items
-                foreach (var instrument in productStock)
+                TransactionResponse response = Serializer.Deserialize<TransactionResponse>(message);
+                if (response.Succeeded)
                 {
-                    instrument.Price *= inflationRate;
+                    RequestInstruments();
+                    TransactionFinish?.Invoke(true);
                 }
-
-                // Notify listeners of the inflation change
-                PriceChange?.Invoke(this, new ChangePriceEventArgs(inflationRate));
-
+                else
+                {
+                    TransactionFinish?.Invoke(false);
+                }
             }
+        }
+
+        private void UpdateAllProducts(UpdateAllResponse response)
+        {
+            if (response.Items == null)
+                return;
+
+            lock (instrumentsLock)
+            {
+                items.Clear();
+                foreach (InstrumentDTO item in response.Items)
+                {
+                    items.Add(item.Id, item.ToInstrument());
+                }
+            }
+
+            ItemsUpdated?.Invoke();
+        }
+
+        private void UpdateAllPrices(PriceChangedResponse response)
+        {
+            if (response.NewPrices == null)
+                return;
+
+            lock (instrumentsLock)
+            {
+                foreach (var newPrice in response.NewPrices)
+                {
+                    if (items.ContainsKey(newPrice.ItemID))
+                    {
+                        items[newPrice.ItemID].Price = newPrice.NewPrice;
+                    }
+                }
+            }
+            PriceChanged?.Invoke(this, new ChangePriceEventArgs(0f));
+        }
+
+        public async Task RequestInstruments()
+        {
+            await connectionService.SendAsync(Serializer.Serialize(new GetItemsCommand()));
+        }
+
+        public async void RequestServerForUpdate()
+        {
+            if (connectionService.IsConnected())
+            {
+                await RequestInstruments();
+            }
+        }
+
+        public async Task SellInstrument(Guid itemId)
+        {
+            if (connectionService.IsConnected())
+            {
+                SellItemCommand sellItemCommand = new SellItemCommand{ ItemId = itemId };
+                await connectionService.SendAsync(Serializer.Serialize(sellItemCommand));
+            }
+        }
+
+        public List<IInstrument> GetInstruments()
+        {
+            List<IInstrument> result = new List<IInstrument>();
+            lock (instrumentsLock)
+            {
+                result.AddRange(items.Values.Select(i => new Instrument(i)));
+            }
+            return result;
+        }
+
+        public IInstrument GetInstrumentById(Guid guid)
+        {
+            IInstrument result;
+            lock (instrumentsLock)
+            {
+                if (items.ContainsKey(guid))
+                {
+                    result = items[guid];
+                }
+                else
+                {
+                    throw new KeyNotFoundException();
+                }
+            }
+            return result;
+        }
+
+        public List<IInstrument> GetInstrumentsByType(InstrumentType type)
+        {
+            List<IInstrument> result = new List<IInstrument>();
+            lock (instrumentsLock)
+            {
+                result.AddRange(items.Values
+                    .Where(i => i.Type == type)
+                    .Select(i => new Instrument(i)));
+            }
+
+            return result;
         }
     }
 }

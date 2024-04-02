@@ -1,4 +1,5 @@
-﻿using Tpum.Data;
+﻿using ClientLogic.Interfaces;
+using Tpum.Data;
 using Tpum.Logic;
 using Tpum.Logic.Interfaces;
 
@@ -22,6 +23,7 @@ namespace Logic
             return new LogicApi(dataApi);
         }
 
-        public abstract IStore GetStore();
+        public abstract IShopLogic GetStore();
+        public abstract IConnectionServiceLogic GetConnectionService();
     }
 }

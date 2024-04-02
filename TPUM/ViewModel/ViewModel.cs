@@ -1,4 +1,5 @@
 ﻿using GalaSoft.MvvmLight.Command;
+using Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -10,24 +11,38 @@ namespace Tpum.Presentation.ViewModel
 {
     public class ViewModel : INotifyPropertyChanged
     {
+        private enum CurrentTab
+        {
+            String = 0,
+            Wind = 1,
+            Percussion = 2,
+            All = 3
+        }
+
+        private CurrentTab currentTab = CurrentTab.All;
         public event PropertyChangedEventHandler PropertyChanged;
-        private ObservableCollection<InstrumentPresentation> instruments;
+        private ObservableCollection<InstrumentModel> instruments;
         private readonly Model.Model model;
-        private decimal consumerFunds;
 
         public ViewModel()
         {
             this.model = new Model.Model();
-            this.instruments = new ObservableCollection<InstrumentPresentation>(this.model.GetInstruments());
+
+            model.Store.PriceChanged += HandlePriceInflationChanged;
+            model.Store.OnItemsUpdated += () => RefreshInstruments();
+            model.Store.TransactionFinish += (success) => RefreshInstruments();
+            model.ConnectionService.OnConnectionStateChanged += OnConnectionStateChanged;
+            model.ConnectionService.OnError += OnConnectionStateChanged;
+
+            OnConnectionStateChanged();
+
+            this.instruments = new ObservableCollection<InstrumentModel>();
+
             InstrumentButtonClick = new RelayCommand<Guid>(id => InstrumentButtonClickHandler(id));
             AllButton = new RelayCommand(AllButtonClickHandler);
             StringButton = new RelayCommand(StringButtonClickHandler);
             WindButton = new RelayCommand(WindButtonClickHandler);
             PercussionButton = new RelayCommand(PercussionButtonClickHandler);
-            model.Store.ProductQuantityChange += OnQuantityChanged;
-            model.Store.ConsumerFundsChange += OnConsumerFundsChanged;
-            model.Store.PriceChange += HandlePriceInflationChanged;
-            consumerFunds = this.model.Store.GetConsumerFunds();
         }
 
         public ICommand AllButton { get; private set; }
@@ -35,7 +50,7 @@ namespace Tpum.Presentation.ViewModel
         public ICommand WindButton { get; private set; }
         public ICommand PercussionButton { get; private set; }
         public ICommand InstrumentButtonClick { get; set; }
-        public ObservableCollection<InstrumentPresentation> Instruments
+        public ObservableCollection<InstrumentModel> Instruments
         {
             get
             {
@@ -50,70 +65,68 @@ namespace Tpum.Presentation.ViewModel
             }
         }
 
-        public decimal CustomerFunds
+        private void RefreshInstruments()
         {
-            get { return consumerFunds; }
-            set
-            {
-                if (value != consumerFunds)
-                {
-                    consumerFunds = value;
-                    OnPropertyChanged();
-                }
+            instruments.Clear();
 
+            if (currentTab == CurrentTab.All)
+            {
+                List<InstrumentModel> list = model.Store.GetInstruments();
+                list.ForEach(x => instruments.Add(x));
+            }
+            else
+            {
+                List<InstrumentModel> list = model.Store.GetInstrumentsByCategory((InstrumentTypeModel)currentTab);
+                list.ForEach(x =>  instruments.Add(x));
+            }
+        }
+
+        private void OnConnectionStateChanged()
+        {
+            bool actualState = model.ConnectionService.IsConnected();
+
+            if (!actualState)
+            {
+                model.ConnectionService.Connect(new Uri(@"ws://localhost:8080"));
+            }
+            else
+            {
+                model.Store.RequestServerForUpdate();
             }
         }
 
         private void HandlePriceInflationChanged(object sender, ChangePriceEventArgs args)
         {
-            List<InstrumentPresentation> displayed = new List<InstrumentPresentation>(Instruments);
-            List<InstrumentPresentation> all = model.Store.GetInstruments();
-
-            Instruments.Clear();
-
-            all
-                .Where(i =>  displayed.Contains(i))
-                .ToList()
-                .ForEach(i => Instruments.Add(i));
+            RefreshInstruments();
         }
 
         private void AllButtonClickHandler()
         {
-            Instruments.Clear();
-            model.Store.GetInstruments()
-                .ForEach(i => Instruments.Add(i));
+            currentTab = CurrentTab.All;
+            RefreshInstruments();
         }
 
         private void StringButtonClickHandler()
         {
-            Instruments.Clear();
-            model.Store.GetInstrumentsByCategory(InstrumentCategory.String)
-                .ForEach(i => Instruments.Add(i));
+            currentTab = CurrentTab.String;
+            RefreshInstruments();
         }
 
         private void WindButtonClickHandler()
         {
-            Instruments.Clear();
-            model.Store.GetInstrumentsByCategory(InstrumentCategory.Wind)
-                .ForEach(i => Instruments.Add(i));
+            currentTab = CurrentTab.Wind;
+            RefreshInstruments();
         }
 
         private void PercussionButtonClickHandler()
         {
-            Instruments.Clear();
-            model.Store.GetInstrumentsByCategory(InstrumentCategory.Percussion)
-                .ForEach(i => Instruments.Add(i));
+            currentTab = CurrentTab.Percussion;
+            RefreshInstruments();
         }
 
         private void InstrumentButtonClickHandler(Guid id)
         {
-            InstrumentPresentation? instrument = model.Store.GetInstrumentById(id);
-            if (instrument == null || instrument.Price > consumerFunds)
-            {
-                return;
-            }
-            model.Store.DecrementInstrumentQuantity(id);
-            model.Store.ChangeConsumerFunds(id);
+            model.SellInstrument(id);
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -123,16 +136,11 @@ namespace Tpum.Presentation.ViewModel
 
         private void OnQuantityChanged(object sender, Tpum.Presentation.Model.ChangeProductQuantityEventArgs e)
         {
-            ObservableCollection<InstrumentPresentation> newInstruments = Instruments;
-            InstrumentPresentation instrument = newInstruments.FirstOrDefault(x => x.Id == e.Id);
+            ObservableCollection<InstrumentModel> newInstruments = Instruments;
+            InstrumentModel instrument = newInstruments.FirstOrDefault(x => x.Id == e.Id);
             int instrumentIndex = newInstruments.IndexOf(instrument);
             newInstruments[instrumentIndex].Quantity = e.Quantity;
-            Instruments = new ObservableCollection<InstrumentPresentation>(newInstruments);
-        }
-
-        private void OnConsumerFundsChanged(object sender, Tpum.Presentation.Model.ChangeConsumerFundsEventArgs e)
-        {
-            CustomerFunds = e.Funds;
+            Instruments = new ObservableCollection<InstrumentModel>(newInstruments);
         }
     }
 }
