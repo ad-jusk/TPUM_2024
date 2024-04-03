@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tpum.Logic
+namespace Tpum.ServerLogic
 {
     public class ChangePriceEventArgs : EventArgs
     {
@@ -15,7 +15,7 @@ namespace Tpum.Logic
             this.NewFunds = newfunds;
         }
 
-        internal ChangePriceEventArgs(Tpum.Data.ChangePriceEventArgs args)
+        internal ChangePriceEventArgs(Tpum.ServerData.ChangePriceEventArgs args)
         {
             this.NewFunds = args.NewFunds;
         }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tpum.Data
+namespace Tpum.ServerLogic
 {
     public class ChangeProductQuantityEventArgs : EventArgs
     {

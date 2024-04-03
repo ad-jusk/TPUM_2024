@@ -1,12 +1,11 @@
-﻿using Tpum.Data.Interfaces;
-using Tpum.Data.WebSocket;
+﻿using Tpum.ServerData.Interfaces;
 
-namespace Tpum.Data
+namespace Tpum.ServerData
 {
     internal class DataApi : DataAbstractApi
     {
         private readonly IShopRepository shopRepository;
-
+        
         public DataApi()
         {
             this.shopRepository = new ShopRepository();

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Tpum.Data.Enums;
+using Tpum.ServerData.Enums;
 
-namespace Tpum.Data
+namespace Tpum.ServerData
 {
     public class ChangeConsumerFundsEventArgs : EventArgs
     {

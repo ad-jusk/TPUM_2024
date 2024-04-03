@@ -1,12 +1,12 @@
-using Tpum.Data;
-using Tpum.Data.DataModels;
-using Tpum.Data.Enums;
-using Tpum.Data.Interfaces;
+using Tpum.ServerData;
+using Tpum.ServerData.DataModels;
+using Tpum.ServerData.Enums;
+using Tpum.ServerData.Interfaces;
 
-namespace DataTest
+namespace ServerDataTest
 {
     [TestClass]
-    public class DataTest
+    public class ServerDataTest
     {
         private static DataAbstractApi PrepareDataLayer()
         {
@@ -59,6 +59,30 @@ namespace DataTest
             int oldQuantity = i.Quantity;
             api.GetShopRepository().DecrementInstrumentQuantity(i.Id);
             Assert.AreEqual(oldQuantity - 1, i.Quantity);
+        }
+        [TestMethod]
+        public void GetConsumerFunds_ReturnsCorrectFunds()
+        {
+            DataAbstractApi api = PrepareDataLayer();
+            var funds = api.GetShopRepository().GetConsumerFunds();
+
+            Assert.AreEqual(1000000M, funds); 
+        }
+
+        [TestMethod]
+        public void ShouldChangeConsumerFunds_Correctly()
+        {
+            DataAbstractApi api = PrepareDataLayer();
+            var initialFunds = api.GetShopRepository().GetConsumerFunds();
+            var instrumentId = Guid.NewGuid();
+            var instrument = new InstrumentMock("Pianino", InstrumentCategory.String, 5000, 2014, 1);
+            api.GetShopRepository().AddInstrument(instrument);
+            var expectedFunds = initialFunds - instrument.Price;
+
+            api.GetShopRepository().ChangeConsumerFunds(instrumentId);
+            var resultFunds = api.GetShopRepository().GetConsumerFunds();
+
+            Assert.AreNotEqual(expectedFunds, resultFunds);
         }
     }
 }

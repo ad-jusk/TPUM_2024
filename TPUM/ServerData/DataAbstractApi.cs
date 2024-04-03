@@ -1,6 +1,6 @@
-﻿using Tpum.Data.Interfaces;
+﻿using Tpum.ServerData.Interfaces;
 
-namespace Tpum.Data
+namespace Tpum.ServerData
 {
     public abstract class DataAbstractApi
     {

@@ -1,8 +1,7 @@
-﻿using Logic;
-using Tpum.Data;
-using Tpum.Logic.Interfaces;
+﻿using Tpum.ServerData;
+using Tpum.ServerLogic.Interfaces;
 
-namespace Tpum.Logic
+namespace Tpum.ServerLogic
 {
     internal class LogicApi : LogicAbstractApi
     {
