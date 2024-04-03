@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Data.WebSocket
+namespace Tpum.Data.Interfaces
 {
     public interface IConnectionService
     {

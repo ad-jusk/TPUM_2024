@@ -31,7 +31,7 @@ namespace Tpum.Presentation.Model
         }
         public async Task SellInstrument(InstrumentPresentation instrument)
         {
-            Store.SellInstrument(instrument);
+            await Store.SellInstrument(instrument);
         }
         public void DecrementInstrumentQuantity(Guid instrumentId)
         {

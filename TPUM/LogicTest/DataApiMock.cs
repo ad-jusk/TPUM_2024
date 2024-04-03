@@ -21,9 +21,8 @@ namespace LogicTest
 
         private readonly List<IInstrument> instrumentStock;
         private decimal consumerFunds;
-        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
-        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangePriceEventArgs> PriceChange;
+        //public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
+        //public event EventHandler<ChangePriceEventArgs> PriceChange;
         public event EventHandler<IInstrument> TransactionSucceeded;
 
         public ShopRepositoryMock()
@@ -93,12 +92,18 @@ namespace LogicTest
                 consumerFunds -= i.Price;
             }
         }
-
+        public void ChangeConsumerFundsCS(decimal consumerFunds)
+        {
+            throw new NotImplementedException();
+        }
         public IDisposable Subscribe(IObserver<IInstrument> observer)
         {
             throw new NotImplementedException();
         }
-
+        public IDisposable Subscribe(IObserver<decimal> observer)
+        {
+            throw new NotImplementedException();
+        }
         public Task Connect(Uri uri)
         {
             throw new NotImplementedException();
@@ -114,9 +119,11 @@ namespace LogicTest
             throw new NotImplementedException();
         }
 
-        public Task TryBuy(IInstrument instrument)
+        public Task TryBuyingInstrument(IInstrument instrument)
         {
             throw new NotImplementedException();
         }
+
+
     }
 }

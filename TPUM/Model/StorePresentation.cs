@@ -1,48 +1,35 @@
-﻿using Tpum.Data.Enums;
-using Tpum.Logic;
+﻿using Tpum.Logic;
 using Tpum.Logic.Interfaces;
-using Tpum.Logic.WebSocket;
 using Tpum.Presentation.Model.Interfaces;
 
 namespace Tpum.Presentation.Model
 {
     public class StorePresentation : IStorePresentation
     {
-        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
-        public event EventHandler<ChangePriceEventArgs>? PriceChange;
+/*        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
+        public event EventHandler<ChangePriceEventArgs>? PriceChange;*/
+        public event EventHandler<decimal> ConsumerFundsChangeCS;
         public event EventHandler<InstrumentPresentation> InstrumentChange;
         public event EventHandler<InstrumentPresentation> TransactionSucceeded;
         private readonly IStore store;
-        private IConnectionService connectionService;
         public StorePresentation(IStore store)
         {
             this.store = store;
-            this.store.ProductQuantityChange += OnQuantityChanged;
-            this.store.ConsumerFundsChange += OnConsumerFundsChanged;
-            this.store.PriceChange += OnPriceChanged;
+            //this.store.ProductQuantityChange += OnQuantityChanged;
+            this.store.ConsumerFundsChangeCS += OnConsumerFundsChanged;
+            //this.store.PriceChange += OnPriceChanged;
             this.store.InstrumentChange += OnInstrumentChanged;
             this.store.TransactionSucceeded += OnTransactionSucceeded;
-            connectionService = ConnectionFactory.CreateConnectionService;
-
-
         }
         public async Task SendMessageAsync(string message)
         {
             await this.store.SendMessageAsync(message);
         }
-        public Task<bool> Connect(Uri uri)
-        {
-            return connectionService.Connect(uri);
-        }
-        public async Task Disconnect()
-        {
-            await connectionService.Disconnect();
-        }
 
-        public bool IsConnected()
+        public async Task SellInstrument(InstrumentPresentation instrument)
         {
-            return connectionService.Connected;
+            InstrumentDTO instrumentDTO = store.GetInstrumentById(instrument.Id);
+            await store.SellInstrument(instrumentDTO);
         }
         public List<InstrumentPresentation> GetInstruments()
         {
@@ -68,39 +55,33 @@ namespace Tpum.Presentation.Model
             return null;
         }
 
-        public async Task SellInstrument(InstrumentPresentation instrument)
-        {
-            InstrumentDTO instrumentDTO = store.GetInstrumentById(instrument.Id);
-            store.SellInstrument(instrumentDTO);
-        }
         public void DecrementInstrumentQuantity(Guid instrumentId)
         {
             store.DecrementInstrumentQuantity(instrumentId);
         }
 
-        public void ChangeConsumerFunds(Guid instrumentId)
-        {
-            store.ChangeConsumerFunds(instrumentId);
-        }
         public decimal GetConsumerFunds()
         {
             return store.GetConsumerFunds();
         }
 
-        private void OnQuantityChanged(object sender, Tpum.Logic.ChangeProductQuantityEventArgs e)
+/*        private void OnQuantityChanged(object sender, Tpum.Logic.ChangeProductQuantityEventArgs e)
         {
             ProductQuantityChange?.Invoke(this, new Tpum.Presentation.Model.ChangeProductQuantityEventArgs(e.Id, e.Quantity));
         }
-
-        private void OnConsumerFundsChanged(object sender, Tpum.Logic.ChangeConsumerFundsEventArgs e)
+*/
+/*        private void OnConsumerFundsChanged(object sender, Tpum.Logic.ChangeConsumerFundsEventArgs e)
         {
             ConsumerFundsChange?.Invoke(this, new Tpum.Presentation.Model.ChangeConsumerFundsEventArgs(e.Funds));
+        }*/
+        private void OnConsumerFundsChanged(object sender, decimal funds)
+        {
+            ConsumerFundsChangeCS?.Invoke(this, funds);
         }
-
-        private void OnPriceChanged(object sender, Tpum.Logic.ChangePriceEventArgs e)
+/*        private void OnPriceChanged(object sender, Tpum.Logic.ChangePriceEventArgs e)
         {
             PriceChange?.Invoke(this, new Tpum.Presentation.Model.ChangePriceEventArgs(e));
-        }
+        }*/
         private void OnInstrumentChanged(object? sender, InstrumentDTO e)
         {
             EventHandler<InstrumentPresentation> handler = InstrumentChange;
@@ -111,9 +92,12 @@ namespace Tpum.Presentation.Model
         private void OnTransactionSucceeded(object? sender,InstrumentDTO e)
         {
             EventHandler<InstrumentPresentation> handler = TransactionSucceeded;
-            InstrumentPresentation fruitPresentation = new InstrumentPresentation(e.Id, e.Name, e.Category,
+            InstrumentPresentation instrumentPresentation = new InstrumentPresentation(e.Id, e.Name, e.Category,
                     e.Price, e.Year, e.Quantity);
-            handler?.Invoke(this, fruitPresentation);
+            
+            //ChangeConsumerFundsCS(e.Id);
+
+            handler?.Invoke(this, instrumentPresentation);
         }
     }
 }

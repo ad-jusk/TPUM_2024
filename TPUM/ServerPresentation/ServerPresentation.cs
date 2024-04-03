@@ -35,10 +35,26 @@ namespace Tpum.ServerPresentation
 
             if (message == "RequestInstruments")
                 await SendAllInstruments();
-            else if (message.StartsWith("CustomMessage"))
+
+            if (message.Contains("RequestInstrumentsById"))
+                await SendAllInstrumentsById(message.Substring("RequestInstrumentsById".Length));
+            switch (message) 
             {
-                // Handle custom message
+                case "RequestString":
+                    await SendInstrumentsByCategory("String");
+                    break;
+                case "RequestWind":
+                    await SendInstrumentsByCategory("Wind");
+                    break;
+                case "RequestPercussion":
+                    await SendInstrumentsByCategory("Percussion");
+                    break;
+                default:
+                    break;
             }
+            if (message.Contains("Echo"))
+                await SendMessageAsync(message);
+
             if (message.Contains("RequestTransaction"))
             {
                 var json = message.Substring("RequestTransaction".Length);
@@ -54,9 +70,28 @@ namespace Tpum.ServerPresentation
 
         private async Task SendAllInstruments()
         {
-            var weapons = store.GetAvailableInstruments();
-            var json = Serializer.InstrumentsToJSON(weapons);
+            var instruments = store.GetAvailableInstruments();
+            var json = Serializer.InstrumentsToJSON(instruments);
             var message = "UpdateAll" + json;
+            await SendMessageAsync(message);
+        }
+        private async Task SendAllInstrumentsById(string instruments)
+        {
+            var instrumentsDTO = Serializer.JSONToInstruments(instruments);
+            var instrumentsToSend = new List<InstrumentDTO>();
+            foreach(InstrumentDTO instr in instrumentsDTO)
+            {
+                instrumentsToSend.Add(store.GetInstrumentById(instr.Id));
+            }
+            var json = Serializer.InstrumentsToJSON(instrumentsToSend);
+            var message = "UpdateSome" + json;
+            await SendMessageAsync(message);
+        }
+        private async Task SendInstrumentsByCategory(string category)
+        {
+            var instruments = store.GetInstrumentsByCategory(category);
+            var json = Serializer.InstrumentsToJSON(instruments);
+            var message = "UpdateCategory" + json;
             await SendMessageAsync(message);
         }
 
@@ -65,20 +100,19 @@ namespace Tpum.ServerPresentation
             Console.WriteLine("[Server]: " + message);
             await WebSocketServer.CurrentConnection.SendAsync(message);
         }
-
         private async Task CreateServer()
         {
             Console.WriteLine("Server running...");
             logic = LogicAbstractApi.Create();
             store = logic.GetStore();
 
-            //TODO: EVENTS
+            //EVENTS
             store.PriceChange += async (sender, eventArgs) =>
             {
                 try
                 {
                     if (WebSocketServer.CurrentConnection != null)
-                        await SendMessageAsync("PriceChanged" + eventArgs.NewFunds.ToString());
+                        await SendMessageAsync("PriceChanged" + eventArgs.NewFunds.ToString() + "\n");
                     else
                         await SendMessageAsync("connection is null");
                 }
@@ -87,7 +121,20 @@ namespace Tpum.ServerPresentation
                     Console.WriteLine("[Server]: Error sending price change message: " + ex.Message);
                 }
             };
-
+            store.ConsumerFundsChange += async (sender, eventArgs) =>
+            {
+                try
+                {
+                    if (WebSocketServer.CurrentConnection != null)
+                        await SendMessageAsync("ConsumerFundsChanged" + eventArgs.Funds.ToString()+ "\n");
+                    else
+                        await SendMessageAsync("connection is null");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("[Server]: Error sending price change message: " + ex.Message);
+                }
+            };
             await WebSocketServer.Server(8080, ConnectionHandler);
         }
     }

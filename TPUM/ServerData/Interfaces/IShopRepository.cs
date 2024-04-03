@@ -12,7 +12,7 @@ namespace Tpum.ServerData.Interfaces
         public void AddInstrument(IInstrument instrument);
         public void RemoveInstrument(IInstrument instrument);
         public IList<IInstrument> GetAllInstruments();
-        public IList<IInstrument> GetInstrumentsByCategory(InstrumentCategory category);
+        public IList<IInstrument> GetInstrumentsByCategory(string category);
         public IInstrument? GetInstrumentById(Guid productId);
         public decimal GetConsumerFunds();
         public void ChangeConsumerFunds(Guid instrumentId); 

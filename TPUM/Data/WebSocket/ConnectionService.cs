@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
+using Tpum.Data.Interfaces;
 using Tpum.Data.WebSocket;
 
 namespace Data.WebSocket

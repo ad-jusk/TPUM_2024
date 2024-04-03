@@ -45,9 +45,8 @@ namespace DataTest
 
         private readonly List<IInstrument> instrumentStock;
         private decimal consumerFunds;
-        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
-        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangePriceEventArgs> PriceChange;
+        //public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
+        //public event EventHandler<ChangePriceEventArgs> PriceChange;
 
         public ShopRepositoryMock()
         {

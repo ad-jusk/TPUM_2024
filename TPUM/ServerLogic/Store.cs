@@ -32,28 +32,11 @@ namespace Tpum.ServerLogic
             return new InstrumentDTO(i.Id, i.Name, i.Category.ToString(), i.Price, i.Year, i.Quantity);
         }
 
-        public List<InstrumentDTO> GetInstrumentsByCategory(InstrumentCategory category)
+        public List<InstrumentDTO> GetInstrumentsByCategory(string category)
         {
             return shopRepository.GetInstrumentsByCategory(category)
                 .Select(i => new InstrumentDTO(i.Id, i.Name, i.Category.ToString(), i.Price, i.Year, i.Quantity))
                 .ToList();
-        }
-
-        public bool SellInstrument(InstrumentDTO instrument)
-        {
-            if (instrument == null) return false;
-            DecrementInstrumentQuantity(instrument.Id);
-            ChangeConsumerFunds(instrument.Id);
-            return true;
-        }
-        public decimal GetConsumerFunds()
-        {
-            return shopRepository.GetConsumerFunds();
-        }
-
-        public void ChangeConsumerFunds(Guid instrumentId)
-        {
-            shopRepository.ChangeConsumerFunds(instrumentId);
         }
 
         public void DecrementInstrumentQuantity(Guid instrumentId)
@@ -61,6 +44,25 @@ namespace Tpum.ServerLogic
             shopRepository.DecrementInstrumentQuantity(instrumentId);
         }
 
+        public void ChangeConsumerFunds(Guid instrumentId)
+        {
+            shopRepository.ChangeConsumerFunds(instrumentId);
+        }
+
+        public decimal GetConsumerFunds()
+        {
+            return shopRepository.GetConsumerFunds();
+        }
+        public bool SellInstrument(InstrumentDTO instrument)
+        {
+            if (instrument == null || instrument.Quantity <= 0) return false;
+            else
+            {
+                DecrementInstrumentQuantity(instrument.Id);
+                ChangeConsumerFunds(instrument.Id);
+                return true;
+            }
+        }
         private void OnConsumerFundsChanged(object sender, Tpum.ServerData.ChangeConsumerFundsEventArgs e)
         {
             ConsumerFundsChange?.Invoke(this, new Tpum.ServerLogic.ChangeConsumerFundsEventArgs(e.Funds));

@@ -6,16 +6,15 @@ namespace Tpum.ServerLogic.Interfaces
     {
         public List<InstrumentDTO> GetAvailableInstruments();
 
-        public List<InstrumentDTO> GetInstrumentsByCategory(InstrumentCategory category);
+        public List<InstrumentDTO> GetInstrumentsByCategory(string category);
 
-        public bool SellInstrument(InstrumentDTO instrument);
         public InstrumentDTO GetInstrumentById(Guid id);
 
         public void DecrementInstrumentQuantity(Guid instrumentId);
 
-        public decimal GetConsumerFunds();
-
         public void ChangeConsumerFunds(Guid instrumentId);
+        public decimal GetConsumerFunds();
+        public bool SellInstrument(InstrumentDTO instrument);
 
         public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
         public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;

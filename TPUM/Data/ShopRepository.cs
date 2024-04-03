@@ -1,24 +1,22 @@
 ﻿using System.Collections.ObjectModel;
 using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
-using Tpum.Data.DataModels;
-using Tpum.Data.WebSocket;
-using System;
 using Data.WebSocket;
 using Data;
 using System.Text.Json;
+using System.Linq;
 
 namespace Tpum.Data
 {
     internal class ShopRepository : IShopRepository
     {
-        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
-        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangePriceEventArgs> PriceChange;
+        //public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
+        //public event EventHandler<ChangePriceEventArgs> PriceChange;
         public event EventHandler<IInstrument> TransactionSucceeded;
         private readonly ConnectionService connectionService;
         private readonly List<IInstrument> productStock;
         private readonly List<IObserver<IInstrument>> observers;
+        private readonly List<IObserver<decimal>> fundsObservers;
         private decimal consumerFunds;
         private bool transactionSuccess;
 
@@ -26,6 +24,7 @@ namespace Tpum.Data
         {
             productStock = new List<IInstrument>();
             observers = new List<IObserver<IInstrument>>();
+            fundsObservers = new List<IObserver<decimal>>();
             consumerFunds = 120000M;
             connectionService = new ConnectionService();
             Connect(new Uri("ws://localhost:8080"));
@@ -37,7 +36,76 @@ namespace Tpum.Data
                 observers.Add(observer);
             return new Unsubscriber(observers, observer);
         }
-        public IConnectionService GetConnectionService() { return connectionService; }
+        public IDisposable Subscribe(IObserver<decimal> fundsObserver)
+        {
+            if (!fundsObservers.Contains(fundsObserver))
+                fundsObservers.Add(fundsObserver);
+            return new Unsubscriber(fundsObservers, fundsObserver);
+        }
+        public void AddInstrument(IInstrument instrument)
+        {
+            productStock.Add(instrument);
+            
+            // Notify observers about changes
+            foreach (var observer in observers)
+            {
+                observer.OnNext(instrument);
+            }
+        }
+
+        public void RemoveInstrument(IInstrument instrument)
+        {
+            IInstrument? instrumentToRemove = productStock.Find(x => x.Id == instrument.Id);
+            if (instrument == null)
+                return; 
+            productStock.Remove(instrument);
+            
+            foreach (var observer in observers)
+            {
+                observer.OnNext(instrument);
+            }
+        }
+        public IList<IInstrument> GetAllInstruments()
+        {
+            return new ReadOnlyCollection<IInstrument>(productStock);
+        }
+
+        public IList<IInstrument> GetInstrumentsByCategory(string category)
+        {
+            if (!Enum.TryParse(category, true, out InstrumentCategory instrumentCategory))
+            {
+                throw new ArgumentException("Invalid instrument category.", nameof(category));
+            }
+            return new ReadOnlyCollection<IInstrument>(productStock.Where(i => i.Category == instrumentCategory).ToList());
+        }
+
+        public IInstrument? GetInstrumentById(Guid productId)
+        {
+            return productStock.Find(i => i.Id.Equals(productId));
+        }
+
+        public decimal GetConsumerFunds()
+        {
+            return consumerFunds;
+        }
+
+        public void ChangeConsumerFundsCS(decimal consumerFunds)
+        {
+            foreach (var fundObserver in fundsObservers)
+            {
+                fundObserver.OnNext(consumerFunds);
+            }
+        }
+        public void DecrementInstrumentQuantity(Guid instrumentId)
+        {
+            IInstrument? instrument = productStock.Find(i => i.Id.Equals(instrumentId));
+            if (instrument != null && instrument.Quantity > 0)
+            {
+                instrument.Quantity -= 1;
+                //OnQuantityChanged(instrument.Id, instrument.Quantity);
+            }
+        }
+
         public async Task Connect(Uri uri)
         {
             try
@@ -67,100 +135,51 @@ namespace Tpum.Data
                 await connectionService.Connection.SendAsync(message);
             }
         }
-        public async Task TryBuy(IInstrument instrument)
+        public async Task TryBuyingInstrument(IInstrument instrument)
         {
             string categoryString = Enum.GetName(typeof(InstrumentCategory), instrument.Category);
 
-            // Create a new anonymous object with the enum value converted to string
             var instrumentData = new
             {
                 instrument.Id,
                 instrument.Name,
-                Category = categoryString, // Use the string representation here
+                Category = categoryString, 
                 instrument.Price,
                 instrument.Year,
                 instrument.Quantity
             };
-
-
-            //string json = Serializer.InstrumentToJSON(instrument);
             string json = JsonSerializer.Serialize(instrumentData);
 
             await connectionService.Connection.SendAsync("RequestTransaction" + json);
         }
-        public void AddInstrument(IInstrument instrument)
-        {
-            productStock.Add(instrument);
-            
-            // Notify observers about changes
-            foreach (var observer in observers)
-            {
-                observer.OnNext(instrument);
-            }
-        }
 
-        public void RemoveInstrument(IInstrument instrument)
-        {
-            IInstrument? instrumentToRemove = productStock.Find(x => x.Id == instrument.Id);
-            if (instrument == null)
-                return; 
-            productStock.Remove(instrument);
-            
-            foreach (var observer in observers)
-            {
-                observer.OnNext(instrument);
-            }
-        }
-
-        public decimal GetConsumerFunds()
-        {
-            return consumerFunds;
-        }
-
-        public void ChangeConsumerFunds(Guid instrumentId)
-        {
-            IInstrument? instrument = productStock.Find(i => i.Id.Equals(instrumentId));
-            if (instrument != null && instrument.Price > 0 && instrument.Quantity > 0)
-            {
-                consumerFunds -= instrument.Price;
-                OnConsumerFundsChanged(consumerFunds);
-            }
-        }
-
-        public void DecrementInstrumentQuantity(Guid instrumentId)
-        {
-            IInstrument? instrument = productStock.Find(i => i.Id.Equals(instrumentId));
-            if (instrument != null && instrument.Quantity > 0)
-            {
-                instrument.Quantity -= 1;
-                OnQuantityChanged(instrument.Id, instrument.Quantity);
-            }
-        }
-
-        public IList<IInstrument> GetAllInstruments()
-        {
-            return new ReadOnlyCollection<IInstrument>(productStock);
-        }
-
-        public IList<IInstrument> GetInstrumentsByCategory(string category)
-        {
-            if (!Enum.TryParse(category, true, out InstrumentCategory instrumentCategory))
-            {
-                throw new ArgumentException("Invalid instrument category.", nameof(category));
-            }
-            return new ReadOnlyCollection<IInstrument>(productStock.Where(i => i.Category == instrumentCategory).ToList());
-        }
-
-        public IInstrument? GetInstrumentById(Guid productId)
-        {
-            return productStock.Find(i => i.Id.Equals(productId));
-        }
 
         private void ParseMessage(string message)
         {
             if (message.StartsWith("UpdateAll"))
             {
                 string json = message.Substring("UpdateAll".Length);
+                productStock.Clear();
+                List<IInstrument> instruments = Serializer.JSONToInstruments(json);
+                foreach (var instrument in instruments)
+                {
+                    AddInstrument(instrument);
+                }
+            }
+            else if (message.StartsWith("UpdateCategory"))
+            {
+                string json = message.Substring("UpdateCategory".Length);
+                productStock.Clear();
+                List<IInstrument> instruments = Serializer.JSONToInstruments(json);
+                foreach (var instrument in instruments)
+                {
+                    AddInstrument(instrument);
+                }
+            }
+            else if(message.StartsWith("UpdateSome"))
+            {
+                string json = message.Substring("UpdateSome".Length);
+                productStock.Clear();
                 List<IInstrument> instruments = Serializer.JSONToInstruments(json);
                 foreach (var instrument in instruments)
                 {
@@ -170,18 +189,16 @@ namespace Tpum.Data
             else if (message.Contains("PriceChanged"))
             {
                 string priceChangedStr = message.Substring("PriceChanged".Length);
-                SendMessageAsync("RequestInstruments");
+                decimal newInflation = decimal.Parse(priceChangedStr);
+                //ChangePrice(newInflation);
 
-                /*                productStock.Clear();
-                                string json = message.Substring("UpdateAll".Length);
-                                List<IInstrument> instruments = Serializer.JSONToInstruments(json);
-                                foreach (var instrument in instruments)
-                                {
-                                    instrument.Price *= decimal.Parse(priceChangedStr);
-                                    AddInstrument(instrument);
-                                }
-                                PriceChange?.Invoke(this, new ChangePriceEventArgs(decimal.Parse(priceChangedStr)));*/
-                //ChangePrice(decimal.Parse(priceChangedStr));
+                string json = UpdateSomeInstruments();
+                SendMessageAsync("RequestInstrumentsById" + json);
+            }
+            else if (message.Contains("ConsumerFundsChanged"))
+            {
+                string priceChangedStr = message.Substring("ConsumerFundsChanged".Length);
+                ChangeConsumerFundsCS(decimal.Parse(priceChangedStr));
             }
             else if (message.Contains("TransactionResult"))
             {
@@ -192,38 +209,29 @@ namespace Tpum.Data
                 {
                     //EventHandler handler = TransactionFailed;
                     //handler?.Invoke(this, EventArgs.Empty);
+                    SendMessageAsync("OUT OF STOCK");
                     SendMessageAsync("RequestInstruments");
                 }
                 else
                 {
                     EventHandler<IInstrument> handler = TransactionSucceeded;
                     handler?.Invoke(this, Serializer.JSONToInstrument(resString.Substring(1)));
-                    SendMessageAsync("RequestInstruments");
+
+                    string json = UpdateSomeInstruments();
+                    SendMessageAsync("RequestInstrumentsById" +json);
                 }
             }
         }
-        public void ChangePrice(decimal inflationRate)
-        {
-/*            productStock.Clear();
-            string json = message.Substring("UpdateAll".Length);
-            List<IInstrument> instruments = Serializer.JSONToInstruments(json);
-            foreach (var instrument in productStock)
-            {
-                instrument.Price *= inflationRate;
-            }
-            PriceChange?.Invoke(this, new ChangePriceEventArgs(inflationRate));*/
-        }
-        private void OnConsumerFundsChanged(decimal funds)
-        {
-            EventHandler<ChangeConsumerFundsEventArgs> handler = ConsumerFundsChange;
-            handler?.Invoke(this, new ChangeConsumerFundsEventArgs(funds));
-        }
-
-        private void OnQuantityChanged(Guid id, int quantity)
+/*        private void OnQuantityChanged(Guid id, int quantity)
         {
             EventHandler<ChangeProductQuantityEventArgs> handler = ProductQuantityChange;
             handler?.Invoke(this, new ChangeProductQuantityEventArgs(id, quantity));
         }
+        private void OnPriceChanged(decimal newPrice)
+        {
+            EventHandler<ChangePriceEventArgs> handler = PriceChange;
+            handler?.Invoke(this, new ChangePriceEventArgs(newPrice));
+        }*/
 
         private async Task SimulatePriceChangeAsync()
         {
@@ -244,10 +252,40 @@ namespace Tpum.Data
                 }
 
                 // Notify listeners of the inflation change
-                PriceChange?.Invoke(this, new ChangePriceEventArgs(inflationRate));
+                //PriceChange?.Invoke(this, new ChangePriceEventArgs(inflationRate));
 
             }
         }
+        private string UpdateSomeInstruments()
+        {
+            List<IInstrument> displayedProducts = new List<IInstrument>(productStock);
+            productStock.Clear();
+            IList<IInstrument> all = GetAllInstruments();
+            List<object> instrumentDataList = new List<object>();
 
+            all
+                .Where(i => displayedProducts.Contains(i))
+                .ToList()
+                .ForEach(i => {
+                    AddInstrument(i);
+                });
+            foreach (var instrument in displayedProducts)
+            {
+                string categoryString = Enum.GetName(typeof(InstrumentCategory), instrument.Category);
+
+                var instrumentData = new
+                {
+                    instrument.Id,
+                    instrument.Name,
+                    Category = categoryString,
+                    instrument.Price,
+                    instrument.Year,
+                    instrument.Quantity
+                };
+                instrumentDataList.Add(instrumentData);
+            }
+            string json = JsonSerializer.Serialize(instrumentDataList);
+            return json;
+        }
     }
 }

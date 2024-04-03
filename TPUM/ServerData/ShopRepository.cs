@@ -38,6 +38,29 @@ namespace Tpum.ServerData
         {
             productStock.Add(instrument);
         }
+        public void RemoveInstrument(IInstrument instrument)
+        {
+            productStock.Remove(instrument);
+        }
+
+        public IList<IInstrument> GetAllInstruments()
+        {
+            return new ReadOnlyCollection<IInstrument>(productStock);
+        }
+
+        public IList<IInstrument> GetInstrumentsByCategory(string category)
+        {
+            if (!Enum.TryParse(category, true, out InstrumentCategory instrumentCategory))
+            {
+                throw new ArgumentException("Invalid instrument category.", nameof(category));
+            }
+            return new ReadOnlyCollection<IInstrument>(productStock.Where(i => i.Category == instrumentCategory).ToList());
+        }
+
+        public IInstrument? GetInstrumentById(Guid productId)
+        {
+            return productStock.Find(i => i.Id.Equals(productId));
+        }
 
         public decimal GetConsumerFunds()
         {
@@ -62,26 +85,6 @@ namespace Tpum.ServerData
                 instrument.Quantity -= 1;
                 OnQuantityChanged(instrument.Id, instrument.Quantity);
             }
-        }
-
-        public void RemoveInstrument(IInstrument instrument)
-        {
-            productStock.Remove(instrument);
-        }
-        
-        public IList<IInstrument> GetAllInstruments()
-        {
-            return new ReadOnlyCollection<IInstrument>(productStock);
-        }
-
-        public IList<IInstrument> GetInstrumentsByCategory(InstrumentCategory category)
-        {
-            return new ReadOnlyCollection<IInstrument>(productStock.Where(i => i.Category == category).ToList());
-        }
-
-        public IInstrument? GetInstrumentById(Guid productId)
-        {
-            return productStock.Find(i => i.Id.Equals(productId));
         }
 
         private void OnConsumerFundsChanged(decimal funds)
