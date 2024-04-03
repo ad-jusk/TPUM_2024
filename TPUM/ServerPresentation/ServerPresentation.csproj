@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Commons\Commons.csproj" />
     <ProjectReference Include="..\ServerLogic\ServerLogic.csproj" />
   </ItemGroup>
 

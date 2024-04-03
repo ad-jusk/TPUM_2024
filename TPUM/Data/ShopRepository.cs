@@ -114,6 +114,7 @@ namespace Tpum.Data
                 await connectionService.Connection.SendAsync(message);
             }
         }
+
         public async Task TryBuyingInstrument(IInstrument instrument)
         {
             string categoryString = Enum.GetName(typeof(InstrumentCategory), instrument.Category);
@@ -178,7 +179,7 @@ namespace Tpum.Data
             else if (message.Contains("PriceChanged"))
             {
                 string json = SerializeDisplayedInstruments();
-                SendMessageAsync("RequestInstrumentsById " + json);
+                SendMessageAsync("RequestInstrumentsById" + json);
             }
             else if (message.Contains("ConsumerFundsChanged"))
             {
