@@ -2,7 +2,7 @@
 
 namespace Tpum.ServerData
 {
-    public class DataApi : DataAbstractApi
+    internal class DataApi : DataAbstractApi
     {
         private readonly IShopRepository shopRepository;
         

@@ -30,11 +30,6 @@ namespace Tpum.Presentation.ViewModel
             model.Store.InstrumentChange += OnInstrumentChanged;
 
             instruments = new ObservableCollection<InstrumentPresentation>();
-           
-            foreach (InstrumentPresentation instrument in model.Store.GetInstruments())
-            {
-                Instruments.Add(instrument);
-            }
         }
 
         public ICommand AllButton { get; private set; }
@@ -89,32 +84,24 @@ namespace Tpum.Presentation.ViewModel
         private void AllButtonClickHandler()
         {
             Instruments.Clear();
-            model.Store.GetInstruments()
-                .ForEach(i => Instruments.Add(i));
             model.Store.SendMessageAsync("RequestInstruments");
         }
 
         private void StringButtonClickHandler()
         {
             Instruments.Clear();
-            model.Store.GetInstrumentsByCategory("String")
-                .ForEach(i => Instruments.Add(i));
             model.Store.SendMessageAsync("RequestString");
         }
 
         private void WindButtonClickHandler()
         {
             Instruments.Clear();
-            model.Store.GetInstrumentsByCategory("Wind")
-                .ForEach(i => Instruments.Add(i));
             model.Store.SendMessageAsync("RequestWind");
         }
 
         private void PercussionButtonClickHandler()
         {
             Instruments.Clear();
-            model.Store.GetInstrumentsByCategory("Percussion")
-                .ForEach(i => Instruments.Add(i));
             model.Store.SendMessageAsync("RequestPercussion");
         }
 

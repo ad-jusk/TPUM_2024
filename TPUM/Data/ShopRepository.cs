@@ -160,7 +160,6 @@ namespace Tpum.Data
             else if (message.Contains("PriceChanged"))
             {
                 string priceChangedStr = message.Substring("PriceChanged".Length);
-                decimal newInflation = decimal.Parse(priceChangedStr);
 
                 string json = UpdateSomeInstruments();
                 SendMessageAsync("RequestInstrumentsById" + json);

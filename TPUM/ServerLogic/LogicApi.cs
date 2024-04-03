@@ -3,7 +3,7 @@ using Tpum.ServerLogic.Interfaces;
 
 namespace Tpum.ServerLogic
 {
-    public class LogicApi : LogicAbstractApi
+    internal class LogicApi : LogicAbstractApi
     {
         private readonly IStore store;
 

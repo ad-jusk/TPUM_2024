@@ -37,29 +37,25 @@ namespace Tpum.ServerPresentation
             if (message == "RequestInstruments")
                 await SendAllInstruments();
 
-            if (message == "RequestFunds")
+            else if (message == "RequestFunds")
                 await SendMessageAsync("ConsumerFundsChanged" + store.GetConsumerFunds().ToString() + "\n");
 
-            if (message.Contains("RequestInstrumentsById"))
+            else if (message.Contains("RequestInstrumentsById"))
                 await SendAllInstrumentsById(message.Substring("RequestInstrumentsById".Length));
-            switch (message) 
-            {
-                case "RequestString":
-                    await SendInstrumentsByCategory("String");
-                    break;
-                case "RequestWind":
-                    await SendInstrumentsByCategory("Wind");
-                    break;
-                case "RequestPercussion":
-                    await SendInstrumentsByCategory("Percussion");
-                    break;
-                default:
-                    break;
-            }
-            if (message.Contains("Echo"))
+
+            else if (message == "RequestString")
+                await SendInstrumentsByCategory("String");
+
+            else if (message == "RequestWind")
+                await SendInstrumentsByCategory("Wind");
+
+            else if (message == "RequestPercussion")
+                await SendInstrumentsByCategory("Percussion");
+
+            else if (message.Contains("Echo"))
                 await SendMessageAsync(message);
 
-            if (message.Contains("RequestTransaction"))
+            else if (message.Contains("RequestTransaction"))
             {
                 var json = message.Substring("RequestTransaction".Length);
                 var instrumentToBuy = Serializer.JSONToInstrument(json);
@@ -118,7 +114,7 @@ namespace Tpum.ServerPresentation
                 try
                 {
                     if (WebSocketServer.CurrentConnection != null)
-                        await SendMessageAsync("PriceChanged" + eventArgs.NewFunds.ToString() + "\n");
+                        await SendMessageAsync("PriceChanged\n");
                     else
                         await SendMessageAsync("connection is null");
                 }
@@ -133,7 +129,7 @@ namespace Tpum.ServerPresentation
                 try
                 {
                     if (WebSocketServer.CurrentConnection != null)
-                        await SendMessageAsync("ConsumerFundsChanged" + eventArgs.Funds.ToString()+ "\n");
+                        await SendMessageAsync("ConsumerFundsChanged " + eventArgs.Funds.ToString()+ "\n");
                     else
                         await SendMessageAsync("connection is null");
                 }
