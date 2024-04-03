@@ -5,7 +5,7 @@ namespace Tpum.Logic.Interfaces
 {
     public interface IStore
     {
-        public List<InstrumentDTO> GetAvailableInstruments();
+        public List<InstrumentDTO> GetAllInstruments();
 
         public List<InstrumentDTO> GetInstrumentsByCategory(string category);
 

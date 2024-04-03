@@ -15,16 +15,12 @@ namespace Tpum.Logic
         public Store(IShopRepository shopRepository)
         {
             this.shopRepository = shopRepository;
-            //this.shopRepository.ProductQuantityChange += OnQuantityChanged;
-            //this.shopRepository.PriceChange += OnPriceChanged;
             this.shopRepository.TransactionSucceeded += OnTransactionSucceeded;
-            //shopRepository.Subscribe(this);
             shopRepository.Subscribe((IObserver<IInstrument>)this);
             shopRepository.Subscribe((IObserver<decimal>)this);
-
         }
 
-        public List<InstrumentDTO> GetAvailableInstruments()
+        public List<InstrumentDTO> GetAllInstruments()
         {
             return shopRepository.GetAllInstruments()
                 .Select(i => new InstrumentDTO { Id = i.Id, Name = i.Name, Category = i.Category.ToString(), Price = i.Price, Year = i.Year, Quantity = i.Quantity })
@@ -49,6 +45,7 @@ namespace Tpum.Logic
         {
             shopRepository.DecrementInstrumentQuantity(instrumentId);
         }
+
         public decimal GetConsumerFunds()
         {
             return shopRepository.GetConsumerFunds();
@@ -58,25 +55,16 @@ namespace Tpum.Logic
         {
             await shopRepository.SendMessageAsync(message);
         }
+
         public async Task SellInstrument(InstrumentDTO instrumentDTO)
         {
             IInstrument instrument = shopRepository.GetInstrumentById(instrumentDTO.Id);
 
             if (instrument != null && instrument.Quantity > 0)
                 instrument.Price = instrumentDTO.Price;
-
-
             await shopRepository.TryBuyingInstrument(instrument);
         }
-/*        private void OnQuantityChanged(object sender, Tpum.Data.ChangeProductQuantityEventArgs e)
-        {
-            ProductQuantityChange?.Invoke(this, new Tpum.Logic.ChangeProductQuantityEventArgs(e.Id, e.Quantity));
-        }
 
-        private void OnPriceChanged(object sender, Tpum.Data.ChangePriceEventArgs e)
-        {
-            PriceChange?.Invoke(this, new Tpum.Logic.ChangePriceEventArgs(e));
-        }*/
         private void OnTransactionSucceeded(object sender, IInstrument instrument)
         {
             InstrumentDTO InstrumentDTO = new InstrumentDTO();
@@ -89,6 +77,7 @@ namespace Tpum.Logic
 
             TransactionSucceeded?.Invoke(this, InstrumentDTO);
         }
+
         public void OnCompleted()
         {
             this.unsubcriber.Dispose();
@@ -109,17 +98,11 @@ namespace Tpum.Logic
             instrumentDTO.Price = value.Price;
             instrumentDTO.Quantity = value.Quantity;
 
-            if (value.Price < -0.01m && value.Name == "")
-            {
-                //InstrumentChange?.Invoke(this, dto);
-            }
-            else
-                InstrumentChange.Invoke(this, instrumentDTO);
+            InstrumentChange.Invoke(this, instrumentDTO);
         }
+
         public void OnNext(decimal consumerFunds)
         {
-            //decimal consumerFundsDTO = 0M;
-
             ConsumerFundsChangeCS.Invoke(this, consumerFunds);
         }
     }

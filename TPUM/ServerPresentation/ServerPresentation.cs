@@ -1,4 +1,5 @@
 ﻿using ServerPresentation;
+using System;
 using Tpum.ServerLogic;
 using Tpum.ServerLogic.Interfaces;
 
@@ -35,6 +36,9 @@ namespace Tpum.ServerPresentation
 
             if (message == "RequestInstruments")
                 await SendAllInstruments();
+
+            if (message == "RequestFunds")
+                await SendMessageAsync("ConsumerFundsChanged" + store.GetConsumerFunds().ToString() + "\n");
 
             if (message.Contains("RequestInstrumentsById"))
                 await SendAllInstrumentsById(message.Substring("RequestInstrumentsById".Length));
@@ -75,6 +79,7 @@ namespace Tpum.ServerPresentation
             var message = "UpdateAll" + json;
             await SendMessageAsync(message);
         }
+
         private async Task SendAllInstrumentsById(string instruments)
         {
             var instrumentsDTO = Serializer.JSONToInstruments(instruments);
@@ -87,6 +92,7 @@ namespace Tpum.ServerPresentation
             var message = "UpdateSome" + json;
             await SendMessageAsync(message);
         }
+
         private async Task SendInstrumentsByCategory(string category)
         {
             var instruments = store.GetInstrumentsByCategory(category);
@@ -121,6 +127,7 @@ namespace Tpum.ServerPresentation
                     Console.WriteLine("[Server]: Error sending price change message: " + ex.Message);
                 }
             };
+
             store.ConsumerFundsChange += async (sender, eventArgs) =>
             {
                 try

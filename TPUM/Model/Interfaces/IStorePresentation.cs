@@ -8,8 +8,6 @@ namespace Tpum.Presentation.Model.Interfaces
 {
     internal interface IStorePresentation
     {
-/*        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangePriceEventArgs>? PriceChange;*/
         public event EventHandler<InstrumentPresentation> InstrumentChange;
         public event EventHandler<InstrumentPresentation> TransactionSucceeded;
 

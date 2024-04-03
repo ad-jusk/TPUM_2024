@@ -34,7 +34,7 @@ namespace DataTest
         {
             DataAbstractApi api = PrepareDataLayer();
             InstrumentCategory category = InstrumentCategory.Wind;
-            IList<IInstrument> instruments = api.GetShopRepository().GetInstrumentsByCategory(category);
+            IList<IInstrument> instruments = api.GetShopRepository().GetInstrumentsByCategory(category.ToString());
             foreach (IInstrument i in instruments)
             {
                 Assert.AreEqual(i.Category, category);
@@ -49,18 +49,6 @@ namespace DataTest
             IInstrument? instrument2 = api.GetShopRepository().GetInstrumentById(instrument1.Id);
             Assert.IsNotNull(instrument2);
             Assert.AreEqual(instrument1.Id, instrument2.Id);
-        }
-
-        [TestMethod]
-        public void ShouldChangeConsumerFunds()
-        {
-            DataAbstractApi api = PrepareDataLayer();
-            IInstrument i = api.GetShopRepository().GetAllInstruments()[0];
-
-            decimal expected = api.GetShopRepository().GetConsumerFunds() - i.Price;
-            api.GetShopRepository().ChangeConsumerFunds(i.Id);
-
-            Assert.AreEqual(expected, api.GetShopRepository().GetConsumerFunds());
         }
 
         [TestMethod]

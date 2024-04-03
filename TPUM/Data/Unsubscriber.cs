@@ -14,11 +14,13 @@ namespace Tpum.Data
             this._observers = observers;
             this._observer = observer;
         }
+
         public Unsubscriber(List<IObserver<decimal>> fundsObservers, IObserver<decimal> fundsObserver)
         {
             this._fundsObservers = fundsObservers;
             this._fundsObserver = fundsObserver;
         }
+
         public void Dispose()
         {
             if (_observer != null && _observers.Contains(_observer))

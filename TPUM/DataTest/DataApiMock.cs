@@ -45,8 +45,8 @@ namespace DataTest
 
         private readonly List<IInstrument> instrumentStock;
         private decimal consumerFunds;
-        //public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        //public event EventHandler<ChangePriceEventArgs> PriceChange;
+
+        public event EventHandler<IInstrument> TransactionSucceeded;
 
         public ShopRepositoryMock()
         {
@@ -102,16 +102,6 @@ namespace DataTest
             return instrumentStock.Find(i => i.Id.Equals(productId));
         }
 
-        public IList<IInstrument> GetInstrumentsByCategory(InstrumentCategory category)
-        {
-            return new ReadOnlyCollection<IInstrument>(instrumentStock.Where(i => i.Category == category).ToList());
-        }
-
-        public void RemoveInstrument(IInstrument instrument)
-        {
-            throw new NotImplementedException();
-        }
-
         public decimal GetConsumerFunds()
         {
             return consumerFunds;
@@ -137,6 +127,25 @@ namespace DataTest
         }
 
         public Task SendMessageAsync(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IList<IInstrument> GetInstrumentsByCategory(string category)
+        {
+            if (!Enum.TryParse(category, true, out InstrumentCategory instrumentCategory))
+            {
+                throw new ArgumentException("Invalid instrument category.", nameof(category));
+            }
+            return new ReadOnlyCollection<IInstrument>(instrumentStock.Where(i => i.Category == instrumentCategory).ToList());
+        }
+
+        public Task TryBuyingInstrument(IInstrument instrument)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IDisposable Subscribe(IObserver<decimal> observer)
         {
             throw new NotImplementedException();
         }

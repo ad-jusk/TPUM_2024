@@ -1,5 +1,6 @@
 ﻿
 using Data.WebSocket;
+using System.Collections.ObjectModel;
 using Tpum.Data;
 using Tpum.Data.Enums;
 using Tpum.Data.Interfaces;
@@ -21,8 +22,6 @@ namespace LogicTest
 
         private readonly List<IInstrument> instrumentStock;
         private decimal consumerFunds;
-        //public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        //public event EventHandler<ChangePriceEventArgs> PriceChange;
         public event EventHandler<IInstrument> TransactionSucceeded;
 
         public ShopRepositoryMock()
@@ -71,12 +70,11 @@ namespace LogicTest
 
         public IList<IInstrument> GetInstrumentsByCategory(string category)
         {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveInstrument(IInstrument instrument)
-        {
-            throw new NotImplementedException();
+            if (!Enum.TryParse(category, true, out InstrumentCategory instrumentCategory))
+            {
+                throw new ArgumentException("Invalid instrument category.", nameof(category));
+            }
+            return new ReadOnlyCollection<IInstrument>(instrumentStock.Where(i => i.Category == instrumentCategory).ToList());
         }
 
         public decimal GetConsumerFunds()
@@ -98,11 +96,11 @@ namespace LogicTest
         }
         public IDisposable Subscribe(IObserver<IInstrument> observer)
         {
-            throw new NotImplementedException();
+            return null;
         }
         public IDisposable Subscribe(IObserver<decimal> observer)
         {
-            throw new NotImplementedException();
+            return null;
         }
         public Task Connect(Uri uri)
         {
@@ -124,6 +122,9 @@ namespace LogicTest
             throw new NotImplementedException();
         }
 
-
+        public Task TryBuy(IInstrument instrument)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
