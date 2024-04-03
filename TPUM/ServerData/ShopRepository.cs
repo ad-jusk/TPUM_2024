@@ -12,6 +12,8 @@ namespace Tpum.ServerData
         public event EventHandler<ChangePriceEventArgs> PriceChange;
         private readonly List<IInstrument> productStock;
         private decimal consumerFunds;
+        private object instrumentsLock = new object();
+        private object consumerFundsLock = new object();
 
         public ShopRepository() 
         {
@@ -29,23 +31,22 @@ namespace Tpum.ServerData
             SimulatePriceChangeAsync();
         }
 
-        public void AddInstruments(List<IInstrument> instrumentsToAdd)
-        {
-            productStock.AddRange(instrumentsToAdd);
-        }
-
         public void AddInstrument(IInstrument instrument)
         {
-            productStock.Add(instrument);
-        }
-        public void RemoveInstrument(IInstrument instrument)
-        {
-            productStock.Remove(instrument);
+            lock(instrumentsLock)
+            {
+                productStock.Add(instrument);
+            }
         }
 
         public IList<IInstrument> GetAllInstruments()
         {
-            return new ReadOnlyCollection<IInstrument>(productStock);
+            List<IInstrument> instruments = new List<IInstrument>();
+            lock (instrumentsLock) 
+            {
+                instruments.AddRange(productStock);
+            }
+            return new ReadOnlyCollection<IInstrument>(instruments);
         }
 
         public IList<IInstrument> GetInstrumentsByCategory(string category)
@@ -54,12 +55,22 @@ namespace Tpum.ServerData
             {
                 throw new ArgumentException("Invalid instrument category.", nameof(category));
             }
-            return new ReadOnlyCollection<IInstrument>(productStock.Where(i => i.Category == instrumentCategory).ToList());
+            List<IInstrument> instruments = new List<IInstrument>();
+            lock (instrumentsLock)
+            {
+                instruments.AddRange(productStock.Where(i => i.Category == instrumentCategory).ToList());
+            }
+            return new ReadOnlyCollection<IInstrument>(instruments);
         }
 
         public IInstrument? GetInstrumentById(Guid productId)
         {
-            return productStock.Find(i => i.Id.Equals(productId));
+            IInstrument? result;
+            lock (instrumentsLock)
+            {
+                result = productStock.Find(i => i.Id.Equals(productId));
+            }
+            return result;
         }
 
         public decimal GetConsumerFunds()
@@ -72,7 +83,10 @@ namespace Tpum.ServerData
             IInstrument? instrument = productStock.Find(i => i.Id.Equals(instrumentId));
             if (instrument != null && instrument.Price > 0 && instrument.Quantity > 0)
             {
-                consumerFunds -= instrument.Price;
+                lock(consumerFundsLock)
+                {
+                    consumerFunds -= instrument.Price;
+                }
                 OnConsumerFundsChanged(consumerFunds);
             }
         }
@@ -112,14 +126,15 @@ namespace Tpum.ServerData
                 decimal inflationRate = (decimal)random.NextDouble()*(1.2m - 0.8m) + 0.8m;
 
                 // Apply inflation to all items
-                foreach (var instrument in productStock)
+                lock (instrumentsLock)
                 {
-                    instrument.Price *= inflationRate;
+                    foreach (var instrument in productStock)
+                    {
+                        instrument.Price *= inflationRate;
+                    }
                 }
-
                 // Notify listeners of the inflation change
                 PriceChange?.Invoke(this, new ChangePriceEventArgs(inflationRate));
-
             }
         }
     }
