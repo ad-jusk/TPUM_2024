@@ -91,7 +91,7 @@ namespace Tpum.Data
                 bool connected = await connectionService.Connect(uri);
                 if (connected)
                 {
-                    connectionService.Connection.onMessage = ParseMessage;
+                    connectionService.Connection.OnMessage = ParseMessage;
                     await SendMessageAsync("RequestInstruments");
                     await SendMessageAsync("RequestFunds");
                 }

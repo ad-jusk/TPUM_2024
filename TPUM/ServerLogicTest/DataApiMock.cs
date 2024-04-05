@@ -1,114 +1,86 @@
-﻿using System;
+﻿using ServerData;
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Tpum.ServerData;
-using Tpum.ServerData.Enums;
-using Tpum.ServerData.Interfaces;
 
 namespace ServerLogicTest
 {
-    public class DataApiMock : DataAbstractApi
+    internal class DataApiMock : DataAbstractApi
     {
-        private readonly IShopRepository shopRepository = new ShopRepositoryMock();
+        private readonly IShopData shop = new ShopDataMock();
 
-        public override IShopRepository GetShopRepository()
+        public override IShopData GetShop()
         {
-            return shopRepository;
+            return shop;
         }
     }
 
-    public class ShopRepositoryMock : IShopRepository
+    internal class ShopDataMock : IShopData
     {
+        // NOT USED IN MOCK
+        public event EventHandler<PriceInflationEventArgs> InflationChanged;
 
-        private readonly List<IInstrument> instrumentStock;
-        private decimal consumerFunds;
+        private readonly Dictionary<Guid, IInstrument> instruments = new Dictionary<Guid, IInstrument>();
 
-        public event EventHandler<IInstrument> TransactionSucceeded;
-        public event EventHandler<ChangeConsumerFundsEventArgs> ConsumerFundsChange;
-        public event EventHandler<ChangeProductQuantityEventArgs> ProductQuantityChange;
-        public event EventHandler<ChangePriceEventArgs> PriceChange;
-        private readonly object instrumentsLock = new object();
-        private readonly object consumerFundsLock = new object();
-        public ShopRepositoryMock()
+        public ShopDataMock() 
         {
-            this.instrumentStock = new List<IInstrument>()
-            {
-                new InstrumentMock("Pianino", InstrumentCategory.String, 5000, 2014, 10),
-                new InstrumentMock("Fortepian", InstrumentCategory.String, 6000, 2014, 10),
-                new InstrumentMock("Gitara", InstrumentCategory.String, 2200, 2020, 20),
-                new InstrumentMock("Trąbka", InstrumentCategory.Wind, 1500, 2018, 5),
-                new InstrumentMock("Flet", InstrumentCategory.Wind, 1100, 2018, 5),
-                new InstrumentMock("Harmonijka", InstrumentCategory.Wind, 900, 2018, 5),
-                new InstrumentMock("Tamburyn", InstrumentCategory.Percussion, 200, 2018, 5),
-                new InstrumentMock("Bęben", InstrumentCategory.Percussion, 800, 2018, 5),
-            };
-            this.consumerFunds = 1000000M;
+            AddInstrument(new InstrumentMock("Pianino", InstrumentType.String, 5000, 2014, 10));
+            AddInstrument(new InstrumentMock("Fortepian", InstrumentType.String, 6000, 2014, 10));
+            AddInstrument(new InstrumentMock("Gitara", InstrumentType.String, 2200, 2020, 20));
+            AddInstrument(new InstrumentMock("Trąbka", InstrumentType.Wind, 1500, 2018, 5));
         }
 
         public void AddInstrument(IInstrument instrument)
         {
-            instrumentStock.Add(instrument);
+            instruments.Add(instrument.Id, instrument);
         }
 
-        public void AddInstruments(List<IInstrument> instrumentsToAdd)
+        public IInstrument GetInstrumentByID(Guid instrumentId)
         {
-            instrumentStock.AddRange(instrumentsToAdd);
-        }
-
-        public void ChangeConsumerFunds(Guid instrumentId, decimal instrumentPrice)
-        {
-            IInstrument? instrument = instrumentStock.Find(i => i.Id.Equals(instrumentId));
-            if (instrument != null && instrument.Price > 0 && instrument.Quantity > 0)
+            IInstrument? instrument = instruments[instrumentId];
+            if (instrument == null)
             {
-                consumerFunds -= instrument.Price;
+                throw new KeyNotFoundException();
             }
+            return instrument;
         }
 
-        public void DecrementInstrumentQuantity(Guid instrumentId)
+        public List<IInstrument> GetInstruments()
         {
-            IInstrument? instrument = instrumentStock.Find(i => i.Id.Equals(instrumentId));
-            if (instrument != null && instrument.Quantity > 0)
-            {
-                instrument.Quantity -= 1;
-            }
+            return new List<IInstrument>(instruments.Values);
         }
 
-        public IList<IInstrument> GetAllInstruments()
+        public void RemoveInstrument(Guid instrumentId)
         {
-            return instrumentStock;
+            instruments.Remove(instrumentId);
         }
 
-        public IInstrument? GetInstrumentById(Guid productId)
+        public void SellInstrument(Guid instrumentId)
         {
-            return instrumentStock.Find(i => i.Id.Equals(productId));
+            IInstrument instrument = GetInstrumentByID(instrumentId);
+            instrument.Quantity -= 1;
         }
+    }
 
-        public decimal GetConsumerFunds()
+    internal class InstrumentMock : IInstrument
+    {
+        public Guid Id { get; }
+        public string Name { get; private set; }
+        public InstrumentType Type { get; }
+        public float Price { get; set; }
+        public int Year { get; }
+        public int Quantity { get; set; }
+
+        public InstrumentMock(string name, InstrumentType type, float price, int year, int quantity)
         {
-            return consumerFunds;
+            Id = Guid.NewGuid();
+            Name = name;
+            Type = type;
+            Price = price;
+            Year = year;
+            Quantity = quantity;
         }
-
-        public void ChangeConsumerFunds(Guid instrumentId)
-        {
-            IInstrument? i = instrumentStock.Find(i => i.Id.Equals(instrumentId));
-            if (i != null)
-            {
-                consumerFunds -= i.Price;
-            }
-        }
-
-        public IList<IInstrument> GetInstrumentsByCategory(string category)
-        {
-            if (!Enum.TryParse(category, true, out InstrumentCategory instrumentCategory))
-            {
-                throw new ArgumentException("Invalid instrument category.", nameof(category));
-            }
-            return new ReadOnlyCollection<IInstrument>(instrumentStock.Where(i => i.Category == instrumentCategory).ToList());
-        }
-
-
     }
 }

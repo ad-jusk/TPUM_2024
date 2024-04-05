@@ -68,14 +68,14 @@ namespace Tpum.Data.WebSocket
                     {
                         if (_clientWebSocket.State == WebSocketState.Aborted)
                         {
-                            onClose?.Invoke();
+                            OnClose?.Invoke();
                             return;
                         }
                         ArraySegment<byte> segment = new ArraySegment<byte>(buffer);
                         WebSocketReceiveResult result = _clientWebSocket.ReceiveAsync(segment, CancellationToken.None).Result;
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
-                            onClose?.Invoke();
+                            OnClose?.Invoke();
                             _clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "I am closing", CancellationToken.None).Wait();
                             return;
                         }
@@ -84,7 +84,7 @@ namespace Tpum.Data.WebSocket
                         {
                             if (count >= buffer.Length)
                             {
-                                onClose?.Invoke();
+                                OnClose?.Invoke();
                                 _clientWebSocket.CloseAsync(WebSocketCloseStatus.InvalidPayloadData, "That's too long", CancellationToken.None).Wait();
                                 return;
                             }
@@ -93,14 +93,14 @@ namespace Tpum.Data.WebSocket
                             count -= result.Count;
                         }
                         string message = Encoding.UTF8.GetString(buffer, 0, count);
-                        onMessage?.Invoke(message);
+                        OnMessage?.Invoke(message);
                     }
                 }
                 catch (Exception ex)
                 {
                     _log($"Connection has been broken because of an exception {ex}");
                     _clientWebSocket.CloseAsync(WebSocketCloseStatus.InternalServerError, "Connection has been broken because of an exception", CancellationToken.None).Wait();
-                    onClose?.Invoke();
+                    OnClose?.Invoke();
                 }
             }
         }

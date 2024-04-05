@@ -1,27 +1,63 @@
-﻿using Tpum.ServerData;
-using Tpum.ServerLogic;
-using Tpum.ServerLogic.Interfaces;
+﻿using ServerData;
 
-namespace Tpum.ServerLogic
+namespace ServerLogic
 {
     public abstract class LogicAbstractApi
     {
-        public DataAbstractApi DataAbstractApi { get; private set; }
+        public DataAbstractApi DataApi { get; private set; }
 
-        public LogicAbstractApi(DataAbstractApi dataAbstractApi)
+        public LogicAbstractApi(DataAbstractApi dataApi)
         {
-            DataAbstractApi = dataAbstractApi;
+            DataApi = dataApi;
         }
 
-        public static LogicAbstractApi Create(DataAbstractApi dataApi = null)
+        public static LogicAbstractApi Create(DataAbstractApi? dataApi = null)
         {
-            if(dataApi == null)
-            {
-                 return new LogicApi(DataAbstractApi.Create());
-            }
-            return new LogicApi(dataApi);
+            DataAbstractApi dataAbstractApi = dataApi ?? DataAbstractApi.Create();
+            return new LogicApi(dataAbstractApi);
         }
 
-        public abstract IStore GetStore();
+        public abstract IShopLogic GetShop();
+    }
+
+    public class InflationChangedEventArgsLogic : EventArgs
+    {
+        public float NewInflation { get; }
+
+        public InflationChangedEventArgsLogic(float newInflation)
+        {
+            this.NewInflation = newInflation;
+        }
+
+        internal InflationChangedEventArgsLogic(PriceInflationEventArgs args)
+        {
+            this.NewInflation = args.NewInflation;
+        }
+    }
+
+    public enum InstrumentTypeLogic
+    {
+        String = 0,
+        Wind = 1,
+        Percussion = 2,
+    }
+
+    public interface IInstrumentLogic
+    {
+        Guid Id { get; }
+        string Name { get; }
+        InstrumentTypeLogic Type { get; }
+        float Price { get; }
+        int Year { get; }
+        int Quantity { get; }
+    }
+
+    public interface IShopLogic
+    {
+        public event EventHandler<InflationChangedEventArgsLogic> InflationChanged;
+
+        public void SellInstrument(Guid instrumentId);
+
+        public List<IInstrumentLogic> GetInstruments();
     }
 }
