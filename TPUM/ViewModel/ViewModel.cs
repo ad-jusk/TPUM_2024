@@ -3,21 +3,20 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using Tpum.Presentation.Model;
 
 namespace Tpum.Presentation.ViewModel
 {
     public class ViewModel : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+       /* public event PropertyChangedEventHandler PropertyChanged;
         private ObservableCollection<InstrumentPresentation> instruments;
         private readonly Model.Model model;
         private decimal consumerFunds;
-        private string transactionStatusText;
+        private string transactionStatusText;*/
 
         public ViewModel()
         {
-            this.model = new Model.Model();
+            /*this.model = new Model.Model();
 
             InstrumentButtonClick = new RelayCommand<Guid>(id => InstrumentButtonClickHandler(id));
             AllButton = new RelayCommand(AllButtonClickHandler);
@@ -29,7 +28,7 @@ namespace Tpum.Presentation.ViewModel
             model.Store.TransactionSucceeded += OnTransactionSucceeded;
             model.Store.InstrumentChange += OnInstrumentChanged;
 
-            instruments = new ObservableCollection<InstrumentPresentation>();
+            instruments = new ObservableCollection<InstrumentPresentation>();*/
         }
 
         public ICommand AllButton { get; private set; }
@@ -37,7 +36,7 @@ namespace Tpum.Presentation.ViewModel
         public ICommand WindButton { get; private set; }
         public ICommand PercussionButton { get; private set; }
         public ICommand InstrumentButtonClick { get; set; }
-
+/*
         public ObservableCollection<InstrumentPresentation> Instruments
         {
             get
@@ -159,6 +158,7 @@ namespace Tpum.Presentation.ViewModel
         private void OnTransactionSucceeded(object? sender, InstrumentPresentation e)
         {
             TransactionStatusText = "Succesfully bought product" + e.Name.ToString();
-        }
+        }*/
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

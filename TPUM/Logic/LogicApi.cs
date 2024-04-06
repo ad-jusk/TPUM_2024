@@ -1,21 +1,19 @@
-﻿using Logic;
-using Tpum.Data;
-using Tpum.Logic.Interfaces;
+﻿using Data;
 
-namespace Tpum.Logic
+namespace Logic
 {
-    internal class LogicApi : LogicAbstractApi
+    internal class Logic : LogicAbstractApi
     {
-        private readonly IStore store;
+        private readonly IShopLogic shop;
 
-        public LogicApi(DataAbstractApi dataApi) : base(dataApi)
+        public Logic(DataAbstractApi dataApi) : base(dataApi)
         {
-            this.store = new Store(dataApi.GetShopRepository());
+            this.shop = new ShopLogic(dataApi.GetShop());
         }
 
-        public override IStore GetStore()
+        public override IShopLogic GetShop()
         {
-            return store;
+            return shop;
         }
     }
 }
