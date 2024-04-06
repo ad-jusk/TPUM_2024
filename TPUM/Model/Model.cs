@@ -29,7 +29,7 @@ namespace Presentation.Model
     public class Model
     {
         private LogicAbstractApi logicAbstractApi;
-        public ShopPresentation shop { get; private set; }
+        public ShopPresentation Shop { get; private set; }
 
         public event Action? InstrumentsUpdated;
 
@@ -37,7 +37,7 @@ namespace Presentation.Model
         {
             this.logicAbstractApi = logicAbstractApi ?? LogicAbstractApi.Create();
 
-            shop = new ShopPresentation(this.logicAbstractApi.GetShop());
+            Shop = new ShopPresentation(this.logicAbstractApi.GetShop());
         }
 
         public async Task SellInstrument(Guid instrumentId)
