@@ -22,7 +22,6 @@ namespace ServerData
         public ShopData()
         {
             AddInstrument(new Instrument("Pianino", InstrumentType.String, 5000, 2014, 10));
-            AddInstrument(new Instrument("Fortepian", InstrumentType.String, 6000, 2014, 10));
             AddInstrument(new Instrument("Gitara", InstrumentType.String, 2200, 2020, 20));
             AddInstrument(new Instrument("Trąbka", InstrumentType.Wind, 1500, 2018, 5));
             AddInstrument(new Instrument("Flet", InstrumentType.Wind, 1100, 2018, 5));

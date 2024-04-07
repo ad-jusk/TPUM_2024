@@ -23,6 +23,7 @@ namespace Logic
         }
 
         public abstract IShopLogic GetShop();
+        public abstract IConnectionServiceLogic GetConnectionService();
     }
 
     public enum LogicInstrumentType
@@ -69,5 +70,10 @@ namespace Logic
 
         public List<IInstrumentLogic> GetInstruments();
         public List<IInstrumentLogic> GetInstrumentsByType(LogicInstrumentType type);
+    }
+
+    public interface IConnectionServiceLogic
+    {
+        public Task Disconnect(); 
     }
 }

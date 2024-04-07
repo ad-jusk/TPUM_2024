@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Commons;
-using Data;
 
 namespace Data
 {
@@ -83,9 +82,9 @@ namespace Data
             else if (serializer.GetHeader(message) == GetInstrumentsAndFundsResponse.StaticHeader)
             {
                 GetInstrumentsAndFundsResponse response = serializer.Deserialize<GetInstrumentsAndFundsResponse>(message);
-                
-                UpdateAllProducts(new UpdateAllResponse { Instruments = response.Instruments });
+
                 UpdateCustomerFunds(response.Funds);
+                UpdateAllProducts(new UpdateAllResponse { Instruments = response.Instruments });
             }
         }
 
@@ -148,14 +147,6 @@ namespace Data
         private async Task RequestInstruments()
         {
             await connectionService.SendAsync(serializer.Serialize(new GetInstrumentsCommand()));
-        }
-
-        public void RequestUpdate()
-        {
-            if (connectionService.IsConnected())
-            {
-                Task.Run(async () => await RequestInstruments());
-            }
         }
 
         public async Task SellInstrument(Guid instrumentId)

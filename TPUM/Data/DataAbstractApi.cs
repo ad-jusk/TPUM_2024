@@ -39,8 +39,6 @@ namespace Data
         public event Action? InstrumentsUpdated;
         public event Action<bool>? TransactionFinish;
 
-        public void RequestUpdate();
-
         public Task SellInstrument(Guid instrumentId);
 
         public List<IInstrument> GetInstruments();

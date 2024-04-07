@@ -1,4 +1,5 @@
 ﻿using Presentation.ViewModel;
+using System.ComponentModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,16 +13,17 @@ using System.Windows.Shapes;
 
 namespace View
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
-            ViewModel _vm = (ViewModel)DataContext;
+        }
 
+        private async void MainWindow_OnClosing(object sender, CancelEventArgs e)
+        {
+            ViewModel viewModel = (ViewModel)DataContext;
+            await viewModel.CloseConnection();
         }
     }
 }

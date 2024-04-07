@@ -8,6 +8,7 @@
         xmlns:converters="clr-namespace:Presentation.View" xmlns:viewmodel1="clr-namespace:Presentation.ViewModel;assembly=ViewModel"
         mc:Ignorable="d"
         ResizeMode="NoResize"
+        Closing="MainWindow_OnClosing"
         Title="Sklep" Height="450" Width="800">
 
     <Window.DataContext>

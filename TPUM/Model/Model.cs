@@ -44,5 +44,10 @@ namespace Presentation.Model
         {
             await logicAbstractApi.GetShop().SellInstrument(instrumentId);
         }
+
+        public async Task Disconnect()
+        {
+            await logicAbstractApi.GetConnectionService().Disconnect();
+        }
     }
 }

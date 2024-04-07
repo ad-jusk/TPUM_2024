@@ -66,6 +66,11 @@ namespace Presentation.ViewModel
             InstrumentButtonClick = new RelayCommand<Guid>(id => HandleOnInstrumentButtonClick(id));
         }
 
+        public async Task CloseConnection()
+        {
+            await model.Disconnect();
+        }
+
         private void HandleCustomerFundsChanged(float funds)
         {
             CustomerFunds = funds;
