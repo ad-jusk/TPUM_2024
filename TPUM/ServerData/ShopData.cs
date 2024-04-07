@@ -10,6 +10,8 @@ namespace ServerData
     internal class ShopData : IShopData
     {
         private readonly Dictionary<Guid, IInstrument> items = new Dictionary<Guid, IInstrument>();
+        private float customerFunds = 1000000f;
+
         private bool priceChangeEnabled;
 
         private object itemsLock = new object();
@@ -74,6 +76,7 @@ namespace ServerData
                 if (items.ContainsKey(instrumentId))
                 {
                     items[instrumentId].Quantity -= 1;
+                    customerFunds -= items[instrumentId].Price;
                 }
             }
         }
@@ -119,6 +122,11 @@ namespace ServerData
                 }
             }
             return result;
+        }
+
+        public float GetCustomerFunds()
+        {
+            return customerFunds;
         }
     }
 }

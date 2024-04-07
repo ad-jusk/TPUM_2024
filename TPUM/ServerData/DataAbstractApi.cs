@@ -50,5 +50,7 @@ namespace ServerData
 
         public void AddInstrument(IInstrument instrument);
         public void RemoveInstrument(Guid instrumentId);
+
+        public float GetCustomerFunds();
     }
 }

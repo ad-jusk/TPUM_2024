@@ -59,5 +59,7 @@ namespace ServerLogic
         public void SellInstrument(Guid instrumentId);
 
         public List<IInstrumentLogic> GetInstruments();
+
+        public float GetCustomerFunds();
     }
 }

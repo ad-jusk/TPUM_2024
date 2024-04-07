@@ -60,6 +60,7 @@ namespace Logic
     public interface IShopLogic
     {
         public event EventHandler<LogicInflationChangedEventArgs> InflationChanged;
+        public event EventHandler<float> CustomerFundsChanged;
 
         public event Action? InstrumentsUpdated;
         public event Action<bool>? TransactionFinish;

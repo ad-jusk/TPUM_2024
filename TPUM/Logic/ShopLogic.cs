@@ -6,21 +6,24 @@ using Data;
 
 namespace Logic
 {
-    internal class ShopLogic : IShopLogic, IObserver<InflationChangedEventArgs>
+    internal class ShopLogic : IShopLogic, IObserver<InflationChangedEventArgs>, IObserver<float>
     {
         private readonly IShopData shop;
 
         public event EventHandler<LogicInflationChangedEventArgs>? InflationChanged;
+        public event EventHandler<float>? CustomerFundsChanged;
         public event Action? InstrumentsUpdated;
         public event Action<bool>? TransactionFinish;
 
         private IDisposable shopDataSubscriptionHandle;
+        private IDisposable customerFundsSubscriptionHandle;
 
         public ShopLogic(IShopData shopData)
         {
             this.shop = shopData;
 
-            shopDataSubscriptionHandle = shopData.Subscribe(this);
+            shopDataSubscriptionHandle = shopData.Subscribe((IObserver<InflationChangedEventArgs>) this);
+            customerFundsSubscriptionHandle = shopData.Subscribe((IObserver<float>) this);
 
             shopData.InstrumentsUpdated += () => InstrumentsUpdated?.Invoke();
             shopData.TransactionFinish += (bool succeeded) => TransactionFinish?.Invoke(succeeded);
@@ -62,6 +65,7 @@ namespace Logic
         public void OnCompleted()
         {
             shopDataSubscriptionHandle.Dispose();
+            customerFundsSubscriptionHandle.Dispose();
         }
 
         public void OnError(Exception error)
@@ -72,6 +76,11 @@ namespace Logic
         public void OnNext(InflationChangedEventArgs value)
         {
             InflationChanged?.Invoke(this, new LogicInflationChangedEventArgs(value));
+        }
+
+        public void OnNext(float value)
+        {
+            CustomerFundsChanged?.Invoke(this, value);
         }
     }
 }

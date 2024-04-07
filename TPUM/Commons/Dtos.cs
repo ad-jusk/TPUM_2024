@@ -14,6 +14,16 @@ namespace Commons
     }
 
     [Serializable]
+    public class GetInstrumentsAndFundsCommand : ServerCommand
+    {
+        public static string StaticHeader = "GetInstrumentsAndFunds";
+
+        public GetInstrumentsAndFundsCommand() : base(StaticHeader)
+        {
+        }
+    }
+
+    [Serializable]
     public class GetInstrumentsCommand : ServerCommand
     {
         public static string StaticHeader = "GetInstruments";
@@ -84,6 +94,19 @@ namespace Commons
     }
 
     [Serializable]
+    public class GetInstrumentsAndFundsResponse : ServerResponse
+    {
+        public static readonly string StaticHeader = "GetAllData";
+
+        public InstrumentDTO[]? Instruments;
+        public float Funds;
+
+        public GetInstrumentsAndFundsResponse() : base(StaticHeader)
+        {
+        }
+    }
+
+    [Serializable]
     public class UpdateAllResponse : ServerResponse
     {
         public static readonly string StaticHeader = "UpdateAllItems";
@@ -116,6 +139,7 @@ namespace Commons
 
         public Guid TransactionId;
         public bool Succeeded;
+        public float CustomerFunds;
 
         public TransactionResponse() : base(StaticHeader)
         {

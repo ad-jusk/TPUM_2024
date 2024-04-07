@@ -62,6 +62,11 @@ namespace ServerLogicTest
             IInstrument instrument = GetInstrumentByID(instrumentId);
             instrument.Quantity -= 1;
         }
+
+        public float GetCustomerFunds()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     internal class InstrumentMock : IInstrument

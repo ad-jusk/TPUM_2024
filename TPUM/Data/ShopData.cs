@@ -12,8 +12,12 @@ namespace Data
     {
         private readonly Dictionary<Guid, IInstrument> instruments = new Dictionary<Guid, IInstrument>();
         private readonly object instrumentLock = new object();
+        private readonly object customerFundsLock = new object();
 
-        private HashSet<IObserver<InflationChangedEventArgs>> observers;
+        private float customerFunds = 0f;
+
+        private HashSet<IObserver<InflationChangedEventArgs>> inflationObservers;
+        private HashSet<IObserver<float>> customerFundsObservers;
 
         public event Action? InstrumentsUpdated;
         public event Action<bool>? TransactionFinish;
@@ -24,7 +28,8 @@ namespace Data
 
         public ShopData(IConnectionService connectionService)
         {
-            this.observers = new HashSet<IObserver<InflationChangedEventArgs>>();
+            this.inflationObservers = new HashSet<IObserver<InflationChangedEventArgs>>();
+            this.customerFundsObservers = new HashSet<IObserver<float>>();
 
             this.connectionService = connectionService;
             this.connectionService.OnMessage += OnMessage;
@@ -37,7 +42,7 @@ namespace Data
 
         ~ShopData()
         {
-            List<IObserver<InflationChangedEventArgs>> cachedObservers = observers.ToList();
+            List<IObserver<InflationChangedEventArgs>> cachedObservers = inflationObservers.ToList();
             foreach (IObserver<InflationChangedEventArgs>? observer in cachedObservers)
             {
                 observer?.OnCompleted();
@@ -46,10 +51,7 @@ namespace Data
 
         private void OnConnect()
         {
-            if (connectionService.IsConnected())
-            {
-                Task.Run(async () => await RequestInstruments());
-            }
+            Task.Run(async () => await RequestInstrumentsAndFunds());
         }
 
         private void OnMessage(string message)
@@ -69,12 +71,32 @@ namespace Data
                 TransactionResponse response = serializer.Deserialize<TransactionResponse>(message);
                 if (response.Succeeded)
                 {
+                    UpdateCustomerFunds(response.CustomerFunds);
                     Task.Run(() => RequestInstruments());
                     TransactionFinish?.Invoke(true);
                 }
                 else
                 {
                     TransactionFinish?.Invoke(false);
+                }
+            }
+            else if (serializer.GetHeader(message) == GetInstrumentsAndFundsResponse.StaticHeader)
+            {
+                GetInstrumentsAndFundsResponse response = serializer.Deserialize<GetInstrumentsAndFundsResponse>(message);
+                
+                UpdateAllProducts(new UpdateAllResponse { Instruments = response.Instruments });
+                UpdateCustomerFunds(response.Funds);
+            }
+        }
+
+        private void UpdateCustomerFunds(float newFunds)
+        {
+            lock(customerFundsLock)
+            {
+                customerFunds = newFunds;
+                foreach (IObserver<float>? observer in customerFundsObservers)
+                {
+                    observer.OnNext(customerFunds);
                 }
             }
         }
@@ -112,10 +134,15 @@ namespace Data
                 }
             }
 
-            foreach (IObserver<InflationChangedEventArgs>? observer in observers)
+            foreach (IObserver<InflationChangedEventArgs>? observer in inflationObservers)
             {
                 observer.OnNext(new InflationChangedEventArgs(response.NewInflation));
             }
+        }
+
+        private async Task RequestInstrumentsAndFunds()
+        {
+            await connectionService.SendAsync(serializer.Serialize(new GetInstrumentsAndFundsCommand()));
         }
 
         private async Task RequestInstruments()
@@ -182,29 +209,48 @@ namespace Data
 
         public IDisposable Subscribe(IObserver<InflationChangedEventArgs> observer)
         {
-            observers.Add(observer);
+            inflationObservers.Add(observer);
             return new ShopDataDisposable(this, observer);
         }
 
         private void UnSubscribe(IObserver<InflationChangedEventArgs> observer)
         {
-            observers.Remove(observer);
+            inflationObservers.Remove(observer);
+        }
+
+        public IDisposable Subscribe(IObserver<float> observer)
+        {
+            customerFundsObservers.Add(observer);
+            return new ShopDataDisposable(this, observer);
+        }
+
+        private void UnSubscribe(IObserver<float> observer)
+        {
+            customerFundsObservers.Remove(observer);
         }
 
         private class ShopDataDisposable : IDisposable
         {
-            private readonly ShopData warehouse;
+            private readonly ShopData shop;
             private readonly IObserver<InflationChangedEventArgs> observer;
+            private readonly IObserver<float> observerFunds;
 
-            public ShopDataDisposable(ShopData warehouse, IObserver<InflationChangedEventArgs> observer)
+            public ShopDataDisposable(ShopData shop, IObserver<InflationChangedEventArgs> observer)
             {
-                this.warehouse = warehouse;
+                this.shop = shop;
                 this.observer = observer;
+            }
+
+            public ShopDataDisposable(ShopData shop, IObserver<float> observer)
+            {
+                this.shop = shop;
+                this.observerFunds = observer;
             }
 
             public void Dispose()
             {
-                warehouse.UnSubscribe(observer);
+                shop.UnSubscribe(observer);
+                shop.UnSubscribe(observerFunds);
             }
         }
     }

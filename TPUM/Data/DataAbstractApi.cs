@@ -34,7 +34,7 @@ namespace Data
         int Quantity { get; set; }
     }
 
-    public interface IShopData : IObservable<InflationChangedEventArgs>
+    public interface IShopData : IObservable<InflationChangedEventArgs>, IObservable<float>
     {
         public event Action? InstrumentsUpdated;
         public event Action<bool>? TransactionFinish;
@@ -47,7 +47,6 @@ namespace Data
 
         public IInstrument GetInstrumentByID(Guid instrumentId);
         public List<IInstrument> GetInstrumentsByType(InstrumentType type);
-
     }
 
     public interface IConnectionService

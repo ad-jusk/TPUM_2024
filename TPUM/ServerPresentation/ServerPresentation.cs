@@ -49,7 +49,6 @@ namespace ServerPresentation
 
             if (serializer.GetHeader(message) == GetInstrumentsCommand.StaticHeader)
             {
-                GetInstrumentsCommand command = serializer.Deserialize<GetInstrumentsCommand>(message);
                 Task task = Task.Run(async () => await SendItems());
             }
             else if (serializer.GetHeader(message) == SellInstrumentCommand.StaticHeader)
@@ -69,10 +68,35 @@ namespace ServerPresentation
                     transactionResponse.Succeeded = false;
                 }
 
+                transactionResponse.CustomerFunds = logicAbstractApi.GetShop().GetCustomerFunds();
+
                 string transactionMessage = serializer.Serialize(transactionResponse);
                 Console.WriteLine($"Send: {transactionMessage}");
                 await webSocketConnection.SendAsync(transactionMessage);
             }
+            else if(serializer.GetHeader(message) == GetInstrumentsAndFundsCommand.StaticHeader)
+            {
+                Task task = Task.Run(async () => await SendItemsAndFunds());
+            }
+        }
+
+        private async Task SendItemsAndFunds()
+        {
+            if (webSocketConnection == null)
+                return;
+
+            Console.WriteLine($"Sending instruments and funds...");
+
+            GetInstrumentsAndFundsResponse serverResponse = new GetInstrumentsAndFundsResponse();
+            List<IInstrumentLogic> instruments = logicAbstractApi.GetShop().GetInstruments();
+
+            float funds = logicAbstractApi.GetShop().GetCustomerFunds();
+            serverResponse.Instruments = instruments.Select(x => x.ToDTO()).ToArray();
+            serverResponse.Funds = funds;
+
+            string responseJson = serializer.Serialize(serverResponse);
+
+            await webSocketConnection.SendAsync(responseJson);
         }
 
         private async Task SendItems()
@@ -80,7 +104,7 @@ namespace ServerPresentation
             if (webSocketConnection == null)
                 return;
 
-            Console.WriteLine($"Sending items...");
+            Console.WriteLine($"Sending instruments...");
 
             UpdateAllResponse serverResponse = new UpdateAllResponse();
             List<IInstrumentLogic> instruments = logicAbstractApi.GetShop().GetInstruments();

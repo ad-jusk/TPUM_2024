@@ -29,8 +29,19 @@ namespace Presentation.ViewModel
                 if(instruments != value) 
                 {
                     instruments = value;
-                    OnPropertyChanged("Instruments");
+                    OnPropertyChanged(nameof(Instruments));
                 }
+            }
+        }
+
+        private float customerFunds;
+        public float CustomerFunds
+        {
+            get { return customerFunds; }
+            private set
+            {
+                customerFunds = value;
+                OnPropertyChanged(nameof(CustomerFunds));
             }
         }
 
@@ -42,6 +53,7 @@ namespace Presentation.ViewModel
 
             model.Shop.OnInstrumentsUpdated += HandleOnInstrumentsUpdated;
             model.Shop.InflationChanged += HandleInflationChanged;
+            model.Shop.CustomerFundsChanged += HandleCustomerFundsChanged;
             model.Shop.TransactionFinish += HandleTransactionFinish;
 
             Instruments = new AsyncObservableCollection<InstrumentPresentation>();
@@ -54,9 +66,14 @@ namespace Presentation.ViewModel
             InstrumentButtonClick = new RelayCommand<Guid>(id => HandleOnInstrumentButtonClick(id));
         }
 
+        private void HandleCustomerFundsChanged(float funds)
+        {
+            CustomerFunds = funds;
+        }
+
         private void HandleTransactionFinish(bool success)
         {
-            // REQUEST FOR FUNDS
+            
         }
 
         private void HandleOnInstrumentsUpdated()

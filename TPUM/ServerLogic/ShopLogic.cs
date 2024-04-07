@@ -46,5 +46,10 @@ namespace ServerLogic
                 .Cast<IInstrumentLogic>()
                 .ToList();
         }
+
+        public float GetCustomerFunds()
+        {
+            return shop.GetCustomerFunds();
+        }
     }
 }

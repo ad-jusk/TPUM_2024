@@ -12,6 +12,7 @@ namespace Presentation.Model
         private IShopLogic Shop { get; set; }
 
         public event EventHandler<ModelInflationChangedEventArgs>? InflationChanged;
+        public Action<float>? CustomerFundsChanged;
         public Action? OnInstrumentsUpdated;
         public event Action<bool>? TransactionFinish;
 
@@ -21,6 +22,7 @@ namespace Presentation.Model
 
             shop.InstrumentsUpdated += () => OnInstrumentsUpdated?.Invoke();
             shop.InflationChanged += (obj, args) => InflationChanged?.Invoke(this, new ModelInflationChangedEventArgs(args));
+            shop.CustomerFundsChanged += (obj, args) => CustomerFundsChanged?.Invoke(args);
             shop.TransactionFinish += succeeded => TransactionFinish?.Invoke(succeeded);
         }
 
