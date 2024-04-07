@@ -1,35 +1,38 @@
-using Logic;
-using Tpum.Logic;
+﻿using Logic;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace LogicTest
 {
     [TestClass]
     public class LogicTest
     {
-        private readonly LogicAbstractApi logicApi = LogicAbstractApi.Create(new DataApiMock());
-
-        [TestMethod]
-        public void ShouldGetAllInstruments()
+        private static LogicAbstractApi createApi()
         {
-            //Assert.AreEqual(logicApi.GetStore().GetAllInstruments().Count, 2);
+            return LogicAbstractApi.Create(new DataApiMock());
         }
 
         [TestMethod]
-        public void ShouldGetInstrumentById()
+        public void Should_Get_Instruments()
         {
-            InstrumentDTO instrument = logicApi.GetStore().GetAllInstruments()[0];
-            Assert.AreEqual(instrument.Id, logicApi.GetStore().GetInstrumentById(instrument.Id).Id);
+            LogicAbstractApi logic = createApi();
+            List<IInstrumentLogic> instruments = logic.GetShop().GetInstruments();
+            Assert.IsTrue(instruments.Count != 0);
         }
 
         [TestMethod]
-        public void ShouldDecrementInstrumentQuantity()
+        public void Should_Get_Instruments_ByType()
         {
-            InstrumentDTO i = logicApi.GetStore().GetAllInstruments()[0];
-
-            logicApi.GetStore().DecrementInstrumentQuantity(i.Id);
-            InstrumentDTO i2 = logicApi.GetStore().GetInstrumentById(i.Id);
-
-            Assert.AreEqual(i.Quantity - 1, i2.Quantity);
+            LogicAbstractApi logic = createApi();
+            List<IInstrumentLogic> instruments = logic.GetShop().GetInstrumentsByType(LogicInstrumentType.String);
+            
+            foreach (var i in instruments)
+            {
+                Assert.AreEqual(LogicInstrumentType.String, i.Type);
+            }
         }
     }
 }

@@ -1,19 +1,23 @@
-﻿using Tpum.ServerData.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Tpum.ServerData
+namespace ServerData
 {
     internal class DataApi : DataAbstractApi
     {
-        private readonly IShopRepository shopRepository;
-        
+        private readonly IShopData shop;
+
         public DataApi()
         {
-            this.shopRepository = new ShopRepository();
+            shop = new ShopData();
         }
 
-        public override IShopRepository GetShopRepository()
+        public override IShopData GetShop()
         {
-            return shopRepository;
+            return shop;
         }
     }
 }

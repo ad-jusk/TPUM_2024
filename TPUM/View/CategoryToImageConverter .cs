@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace Tpum.Presentation.View
+namespace Presentation.View
 {
     public class CategoryToImageConverter : IValueConverter
     {

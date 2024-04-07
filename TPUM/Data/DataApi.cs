@@ -1,20 +1,30 @@
-﻿using Tpum.Data.Interfaces;
-using Tpum.Data.WebSocket;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Tpum.Data
+namespace Data
 {
-    internal class DataApi : DataAbstractApi
+    public class DataApi : DataAbstractApi
     {
-        private readonly IShopRepository shopRepository;
+        private readonly IShopData shop;
+        private readonly IConnectionService connectionService;
 
-        public DataApi()
+        public DataApi(IConnectionService? connectionService)
         {
-            this.shopRepository = new ShopRepository();
+            this.connectionService = connectionService ?? new ConnectionService();
+            this.shop = new ShopData(this.connectionService);
         }
 
-        public override IShopRepository GetShopRepository()
+        public override IConnectionService GetConnectionService()
         {
-            return shopRepository;
+            return connectionService;
+        }
+
+        public override IShopData GetShop()
+        {
+            return shop;
         }
     }
 }

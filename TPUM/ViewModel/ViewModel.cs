@@ -1,119 +1,150 @@
 ﻿using GalaSoft.MvvmLight.Command;
+using Model;
+using Presentation.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using Tpum.Presentation.Model;
 
-namespace Tpum.Presentation.ViewModel
+namespace Presentation.ViewModel
 {
     public class ViewModel : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        private enum CurrentTab
+        {
+            String = 0,
+            Wind = 1,
+            Percussion = 2,
+            All = 3
+        }
+
+        private CurrentTab currentTab;
+
         private ObservableCollection<InstrumentPresentation> instruments;
+        public ObservableCollection<InstrumentPresentation> Instruments
+        {
+            get { return instruments; }
+            private set
+            {
+                if(instruments != value) 
+                {
+                    instruments = value;
+                    OnPropertyChanged(nameof(Instruments));
+                }
+            }
+        }
+
+        private float customerFunds;
+        public float CustomerFunds
+        {
+            get { return customerFunds; }
+            private set
+            {
+                customerFunds = value;
+                OnPropertyChanged(nameof(CustomerFunds));
+            }
+        }
+
         private readonly Model.Model model;
-        private decimal consumerFunds;
-        private string transactionStatusText;
 
         public ViewModel()
         {
-            this.model = new Model.Model();
+            this.model = new Model.Model(null);
 
-            InstrumentButtonClick = new RelayCommand<Guid>(id => InstrumentButtonClickHandler(id));
-            AllButton = new RelayCommand(AllButtonClickHandler);
-            StringButton = new RelayCommand(StringButtonClickHandler);
-            WindButton = new RelayCommand(WindButtonClickHandler);
-            PercussionButton = new RelayCommand(PercussionButtonClickHandler);
+            model.Shop.OnInstrumentsUpdated += HandleOnInstrumentsUpdated;
+            model.Shop.InflationChanged += HandleInflationChanged;
+            model.Shop.CustomerFundsChanged += HandleCustomerFundsChanged;
+            model.Shop.TransactionFinish += HandleTransactionFinish;
 
-            model.Store.ConsumerFundsChangeCS += OnConsumerFundsChanged;
-            model.Store.TransactionSucceeded += OnTransactionSucceeded;
-            model.Store.InstrumentChange += OnInstrumentChanged;
+            Instruments = new AsyncObservableCollection<InstrumentPresentation>();
+            currentTab = CurrentTab.All;
 
-            instruments = new ObservableCollection<InstrumentPresentation>();
+            AllButton = new RelayCommand(() => HandleOnAllButton());
+            StringButton = new RelayCommand(() => HandleOnStringButton());
+            PercussionButton = new RelayCommand(() => HandleOnPercussionButton());
+            WindButton = new RelayCommand(() => HandleOnWindButton());
+            InstrumentButtonClick = new RelayCommand<Guid>(id => HandleOnInstrumentButtonClick(id));
+        }
+
+        public async Task CloseConnection()
+        {
+            await model.Disconnect();
+        }
+
+        private void HandleCustomerFundsChanged(float funds)
+        {
+            CustomerFunds = funds;
+        }
+
+        private void HandleTransactionFinish(bool success)
+        {
+            
+        }
+
+        private void HandleOnInstrumentsUpdated()
+        {
+            RefreshInstruments();
+        }
+
+        private void HandleInflationChanged(object sender, ModelInflationChangedEventArgs args)
+        {
+            RefreshInstruments();
+        }
+
+        private void RefreshInstruments()
+        {
+            instruments.Clear();
+
+            if(currentTab == CurrentTab.All)
+            {
+                List<InstrumentPresentation> allInstruments = model.Shop.GetInstruments();
+                foreach(var i in allInstruments)
+                {
+                    instruments.Add(i);
+                }
+            }
+            else
+            {
+                List<InstrumentPresentation> typeInstruments = model.Shop.GetInstrumentsByType((PresentationInstrumentType)currentTab);
+                foreach (var i in typeInstruments)
+                {
+                    instruments.Add(i);
+                }
+            }
         }
 
         public ICommand AllButton { get; private set; }
+        private void HandleOnAllButton()
+        {
+            currentTab = CurrentTab.All;
+            RefreshInstruments();
+        }
+
         public ICommand StringButton { get; private set; }
+        private void HandleOnStringButton()
+        {
+            currentTab = CurrentTab.String;
+            RefreshInstruments();
+        }
+
         public ICommand WindButton { get; private set; }
+        private void HandleOnWindButton()
+        {
+            currentTab = CurrentTab.Wind;
+            RefreshInstruments();
+        }
+
         public ICommand PercussionButton { get; private set; }
+        private void HandleOnPercussionButton()
+        {
+            currentTab = CurrentTab.Percussion;
+            RefreshInstruments();
+        }
+
         public ICommand InstrumentButtonClick { get; set; }
-
-        public ObservableCollection<InstrumentPresentation> Instruments
+        private void HandleOnInstrumentButtonClick(Guid instrumentId)
         {
-            get
-            {
-                return instruments;
-            }
-            set
-            {
-                if (value.Equals(instruments))
-                    return;
-                instruments = value;
-                OnPropertyChanged("Instruments");
-            }
-        }
-
-        public decimal CustomerFunds
-        {
-            get { return consumerFunds; }
-            set
-            {
-                if (value != consumerFunds)
-                {
-                    consumerFunds = value;
-                    OnPropertyChanged();
-                }
-
-            }
-        }
-        public string TransactionStatusText
-        {
-            get
-            {
-                return transactionStatusText;
-            }
-            set
-            {
-                if (value.Equals(transactionStatusText))
-                    return;
-                transactionStatusText = value;
-                OnPropertyChanged("TransactionStatusText");
-            }
-        }
-
-        private void AllButtonClickHandler()
-        {
-            Instruments.Clear();
-            model.Store.SendMessageAsync("RequestInstruments");
-        }
-
-        private void StringButtonClickHandler()
-        {
-            Instruments.Clear();
-            model.Store.SendMessageAsync("RequestString");
-        }
-
-        private void WindButtonClickHandler()
-        {
-            Instruments.Clear();
-            model.Store.SendMessageAsync("RequestWind");
-        }
-
-        private void PercussionButtonClickHandler()
-        {
-            Instruments.Clear();
-            model.Store.SendMessageAsync("RequestPercussion");
-        }
-
-        private void InstrumentButtonClickHandler(Guid id)
-        {
-            InstrumentPresentation? instrument = model.Store.GetInstrumentById(id);
-            if (instrument == null || instrument.Price > consumerFunds)
-            {
-                return;
-            }
-
-            Task.Run(async () => await model.Store.SellInstrument(instrument));
+            Task.Run(async () => await model.SellInstrument(instrumentId));
         }
 
         private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -121,44 +152,6 @@ namespace Tpum.Presentation.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void OnConsumerFundsChanged(object? sender, decimal funds)
-        {
-            CustomerFunds = funds;
-        }
-
-        private void OnInstrumentChanged(object? sender, InstrumentPresentation e)
-        {
-            ObservableCollection<InstrumentPresentation> newInstruments = new ObservableCollection<InstrumentPresentation>(Instruments);
-            InstrumentPresentation Instrument = newInstruments.FirstOrDefault(x => x.Id == e.Id);
-
-            if (Instrument != null)
-            {
-                int InstrumentIndex = newInstruments.IndexOf(Instrument);
-
-                if (e.Category.ToLower() == "deleted")
-                {
-                    newInstruments.RemoveAt(InstrumentIndex);
-                }
-                else
-                {
-                    newInstruments[InstrumentIndex].Name = e.Name;
-                    newInstruments[InstrumentIndex].Price = e.Price;
-                    newInstruments[InstrumentIndex].Category = e.Category;
-                    newInstruments[InstrumentIndex].Year = e.Year;
-                    newInstruments[InstrumentIndex].Quantity = e.Quantity;
-                }
-            }
-            else
-            {
-                newInstruments.Add(e);
-            }
-
-            Instruments = new ObservableCollection<InstrumentPresentation>(newInstruments);
-        }
-
-        private void OnTransactionSucceeded(object? sender, InstrumentPresentation e)
-        {
-            TransactionStatusText = "Succesfully bought product" + e.Name.ToString();
-        }
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

@@ -1,64 +1,44 @@
-using Tpum.Data;
-using Tpum.Data.DataModels;
-using Tpum.Data.Enums;
-using Tpum.Data.Interfaces;
+﻿using Data;
+using LogicTest;
 
 namespace DataTest
 {
     [TestClass]
     public class DataTest
     {
-        private static DataAbstractApi PrepareDataLayer()
+        private static DataAbstractApi createApi()
         {
             return new DataApiMock();
         }
 
         [TestMethod]
-        public void ShouldAddInstrument()
+        public void Should_Get_Instruments()
         {
-            DataAbstractApi api = PrepareDataLayer();
-            IInstrument instrument = new Instrument("a", InstrumentCategory.Wind, 0, 0, 0);
-            api.GetShopRepository().AddInstrument(instrument);
-            Assert.IsTrue(api.GetShopRepository().GetAllInstruments().Contains(instrument));
+            DataAbstractApi data = createApi();
+            List<IInstrument> instruments = data.GetShop().GetInstruments();
+            Assert.IsTrue(instruments.Count != 0);
         }
 
         [TestMethod]
-        public void ShouldGetAllInstruments()
+        public void Should_Get_Instrument_ById()
         {
-            DataAbstractApi api = PrepareDataLayer();
-            Assert.AreNotEqual(api.GetShopRepository().GetAllInstruments().Count, 0);
+            DataAbstractApi data = createApi();
+            IInstrument toSell = data.GetShop().GetInstruments().First();
+            IInstrument byId = data.GetShop().GetInstrumentByID(toSell.Id);
+
+            Assert.AreEqual(toSell.Id, byId.Id);  
         }
 
         [TestMethod]
-        public void ShouldGetAllInstrumentsByCategory()
+        public void Should_Get_Instrument_ByType()
         {
-            DataAbstractApi api = PrepareDataLayer();
-            InstrumentCategory category = InstrumentCategory.Wind;
-            IList<IInstrument> instruments = api.GetShopRepository().GetInstrumentsByCategory(category.ToString());
-            foreach (IInstrument i in instruments)
+            DataAbstractApi data = createApi();
+            List<IInstrument> byType = data.GetShop().GetInstrumentsByType(InstrumentType.String);
+
+            foreach(var i in byType)
             {
-                Assert.AreEqual(i.Category, category);
+                Assert.AreEqual(InstrumentType.String, i.Type);
             }
-        }
-
-        [TestMethod]
-        public void ShouldGetInstrumentById()
-        {
-            DataAbstractApi api = PrepareDataLayer();
-            IInstrument instrument1 = api.GetShopRepository().GetAllInstruments()[0];
-            IInstrument? instrument2 = api.GetShopRepository().GetInstrumentById(instrument1.Id);
-            Assert.IsNotNull(instrument2);
-            Assert.AreEqual(instrument1.Id, instrument2.Id);
-        }
-
-        [TestMethod]
-        public void ShouldDecrementInstrumentQuantity()
-        {
-            DataAbstractApi api = PrepareDataLayer();
-            IInstrument i = api.GetShopRepository().GetAllInstruments()[0];
-            int oldQuantity = i.Quantity;
-            api.GetShopRepository().DecrementInstrumentQuantity(i.Id);
-            Assert.AreEqual(oldQuantity - 1, i.Quantity);
         }
     }
 }

@@ -1,145 +1,155 @@
 ﻿using Commons;
-using ServerPresentation;
+using ServerLogic;
 using System;
-using Tpum.ServerLogic;
-using Tpum.ServerLogic.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Tpum.ServerPresentation
+namespace ServerPresentation
 {
     internal class ServerPresentation
     {
-        private LogicAbstractApi logic;
-        private IStore store;
-        
-        static async Task Main(string[] args)
+        private readonly LogicAbstractApi logicAbstractApi;
+        private WebSocketConnection? webSocketConnection;
+        private readonly JsonSerializer serializer;
+
+        private ServerPresentation(LogicAbstractApi logicAbstractApi)
         {
-            await new ServerPresentation().CreateServer();
+            this.logicAbstractApi = logicAbstractApi;
+            this.serializer = new JsonSerializer();
+            logicAbstractApi.GetShop().InflationChanged += HandleInflationChanged;
         }
 
-        private void ConnectionHandler(WebSocketConnection webSocketConnection)
+        private async Task StartConnection()
         {
-            Console.WriteLine("[Server]: Client connected");
-            WebSocketServer.CurrentConnection = webSocketConnection;
-            webSocketConnection.onMessage = ParseMessage;
-            webSocketConnection.onClose = () => {
-                Console.WriteLine("[Server]: Connection closed");
-                WebSocketServer.CurrentConnection = null;
-            };
-            webSocketConnection.onError = () => {
-                Console.WriteLine("[Server]: Connection error encountered");
-                WebSocketServer.CurrentConnection = null;
-            };
-        }
-
-        private async void ParseMessage(string message)
-        {
-            Console.WriteLine($"[Client]: {message}");
-
-            if (message == "RequestInstruments")
-                await SendAllInstruments();
-
-            else if (message == "RequestFunds")
-                await SendMessageAsync("ConsumerFundsChanged" + store.GetConsumerFunds().ToString() + "\n");
-
-            else if (message.Contains("RequestInstrumentsById"))
-                await SendAllInstrumentsById(message.Substring("RequestInstrumentsById".Length));
-
-            else if (message == "RequestString")
-                await SendInstrumentsByCategory("String");
-
-            else if (message == "RequestWind")
-                await SendInstrumentsByCategory("Wind");
-
-            else if (message == "RequestPercussion")
-                await SendInstrumentsByCategory("Percussion");
-
-            else if (message.Contains("Echo"))
-                await SendMessageAsync(message);
-
-            else if (message.Contains("RequestTransaction"))
+            while (true)
             {
-                var json = message.Substring("RequestTransaction".Length);
-                var instrumentToBuy = Serializer.JSONToInstrument(json);
-                bool sellResult = store.SellInstrument(instrumentToBuy);
-                int sellResultInt = sellResult ? 1 : 0;
-                var instrument = store.GetInstrumentById(instrumentToBuy.Id);
-                json = Serializer.InstrumentToJSON(instrument);
-
-                await SendMessageAsync("TransactionResult" + sellResultInt.ToString() + (sellResult ? json : ""));
+                Console.WriteLine("Waiting for connect...");
+                await WebSocketServer.StartServer(8080, OnConnect);
             }
         }
 
-        private async Task SendAllInstruments()
+        private void OnConnect(WebSocketConnection connection)
         {
-            var instruments = store.GetAvailableInstruments();
-            var json = Serializer.InstrumentsToJSON(instruments);
-            var message = "UpdateAll" + json;
-            await SendMessageAsync(message);
+            Console.WriteLine($"Connected to {connection}");
+
+            connection.OnMessage = OnMessage;
+            connection.OnError = OnError;
+            connection.OnClose = OnClose;
+
+            webSocketConnection = connection;
         }
 
-        private async Task SendAllInstrumentsById(string instruments)
+        private async void OnMessage(string message)
         {
-            var instrumentsDTO = Serializer.JSONToInstruments(instruments);
-            var instrumentsToSend = new List<InstrumentDTO>();
-            foreach(InstrumentDTO instr in instrumentsDTO)
+            if (webSocketConnection == null)
+                return;
+
+            Console.WriteLine($"New message: {message}");
+
+            if (serializer.GetHeader(message) == GetInstrumentsCommand.StaticHeader)
             {
-                instrumentsToSend.Add(store.GetInstrumentById(instr.Id));
+                Task task = Task.Run(async () => await SendItems());
             }
-            var json = Serializer.InstrumentsToJSON(instrumentsToSend);
-            var message = "UpdateSome" + json;
-            await SendMessageAsync(message);
-        }
-
-        private async Task SendInstrumentsByCategory(string category)
-        {
-            var instruments = store.GetInstrumentsByCategory(category);
-            var json = Serializer.InstrumentsToJSON(instruments);
-            var message = "UpdateCategory" + json;
-            await SendMessageAsync(message);
-        }
-
-        private async Task SendMessageAsync(string message)
-        {
-            Console.WriteLine("[Server]: " + message);
-            await WebSocketServer.CurrentConnection.SendAsync(message);
-        }
-        private async Task CreateServer()
-        {
-            Console.WriteLine("Server running...");
-            logic = LogicAbstractApi.Create();
-            store = logic.GetStore();
-
-            //EVENTS
-            store.PriceChange += async (sender, eventArgs) =>
+            else if (serializer.GetHeader(message) == SellInstrumentCommand.StaticHeader)
             {
+                SellInstrumentCommand command = serializer.Deserialize<SellInstrumentCommand>(message);
+
+                TransactionResponse transactionResponse = new TransactionResponse();
+                transactionResponse.TransactionId = command.TransactionID;
                 try
                 {
-                    if (WebSocketServer.CurrentConnection != null)
-                        await SendMessageAsync("PriceChanged\n");
-                    else
-                        await SendMessageAsync("connection is null");
+                    logicAbstractApi.GetShop().SellInstrument(command.InstrumentID);
+                    transactionResponse.Succeeded = true;
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
-                    Console.WriteLine("[Server]: Error sending price change message: " + ex.Message);
+                    Console.WriteLine($"Exception \"{exception.Message}\" caught during selling item");
+                    transactionResponse.Succeeded = false;
                 }
-            };
 
-            store.ConsumerFundsChange += async (sender, eventArgs) =>
+                transactionResponse.CustomerFunds = logicAbstractApi.GetShop().GetCustomerFunds();
+
+                string transactionMessage = serializer.Serialize(transactionResponse);
+                Console.WriteLine($"Send: {transactionMessage}");
+                await webSocketConnection.SendAsync(transactionMessage);
+            }
+            else if(serializer.GetHeader(message) == GetInstrumentsAndFundsCommand.StaticHeader)
             {
-                try
-                {
-                    if (WebSocketServer.CurrentConnection != null)
-                        await SendMessageAsync("ConsumerFundsChanged " + eventArgs.Funds.ToString()+ "\n");
-                    else
-                        await SendMessageAsync("connection is null");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("[Server]: Error sending price change message: " + ex.Message);
-                }
-            };
-            await WebSocketServer.Server(8080, ConnectionHandler);
+                Task task = Task.Run(async () => await SendItemsAndFunds());
+            }
+        }
+
+        private async Task SendItemsAndFunds()
+        {
+            if (webSocketConnection == null)
+                return;
+
+            Console.WriteLine($"Sending instruments and funds...");
+
+            GetInstrumentsAndFundsResponse serverResponse = new GetInstrumentsAndFundsResponse();
+            List<IInstrumentLogic> instruments = logicAbstractApi.GetShop().GetInstruments();
+
+            float funds = logicAbstractApi.GetShop().GetCustomerFunds();
+            serverResponse.Instruments = instruments.Select(x => x.ToDTO()).ToArray();
+            serverResponse.Funds = funds;
+
+            string responseJson = serializer.Serialize(serverResponse);
+
+            await webSocketConnection.SendAsync(responseJson);
+        }
+
+        private async Task SendItems()
+        {
+            if (webSocketConnection == null)
+                return;
+
+            Console.WriteLine($"Sending instruments...");
+
+            UpdateAllResponse serverResponse = new UpdateAllResponse();
+            List<IInstrumentLogic> instruments = logicAbstractApi.GetShop().GetInstruments();
+            serverResponse.Instruments = instruments.Select(x => x.ToDTO()).ToArray();
+
+            string responseJson = serializer.Serialize(serverResponse);
+            Console.WriteLine(responseJson);
+
+            await webSocketConnection.SendAsync(responseJson);
+        }
+
+        private async void HandleInflationChanged(object? sender, InflationChangedEventArgsLogic args)
+        {
+            if (webSocketConnection == null)
+                return;
+
+            Console.WriteLine($"New inflation: {args.NewInflation}");
+
+            List<IInstrumentLogic> instruments = logicAbstractApi.GetShop().GetInstruments();
+            InflationChangedResponse inflationChangedResponse = new InflationChangedResponse();
+            inflationChangedResponse.NewInflation = args.NewInflation;
+            inflationChangedResponse.NewPrices = instruments.Select(x => new NewPriceDTO(x.Id, x.Price)).ToArray();
+
+            string responseJson = serializer.Serialize(inflationChangedResponse);
+            Console.WriteLine(responseJson);
+
+            await webSocketConnection.SendAsync(responseJson);
+        }
+
+        private void OnError()
+        {
+            Console.WriteLine($"Connection error");
+        }
+
+        private async void OnClose()
+        {
+            Console.WriteLine($"Connection closed");
+            webSocketConnection = null;
+        }
+
+
+        private static async Task Main(string[] args)
+        {
+            ServerPresentation presentation = new ServerPresentation(LogicAbstractApi.Create());
+            await presentation.StartConnection();
         }
     }
 }

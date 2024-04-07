@@ -1,128 +1,111 @@
-﻿
-using Data.WebSocket;
-using System.Collections.ObjectModel;
-using Tpum.Data;
-using Tpum.Data.Enums;
-using Tpum.Data.Interfaces;
+﻿using Data;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace LogicTest
 {
-    public class DataApiMock : DataAbstractApi
+    internal class DataApiMock : DataAbstractApi
     {
-        private readonly IShopRepository shopRepository = new ShopRepositoryMock();
+        private readonly IShopData shop = new ShopDataMock();
 
-        public override IShopRepository GetShopRepository()
+        public override IConnectionService GetConnectionService()
         {
-            return shopRepository;
+            return null;
+        }
+
+        public override IShopData GetShop()
+        {
+            return shop;
         }
     }
 
-    public class ShopRepositoryMock : IShopRepository
+    internal class ShopDataMock : IShopData
     {
+        private readonly Dictionary<Guid, IInstrument> instruments = new Dictionary<Guid, IInstrument>();
 
-        private readonly List<IInstrument> instrumentStock;
-        private decimal consumerFunds;
-        public event EventHandler<IInstrument> TransactionSucceeded;
+        public event Action? InstrumentsUpdated;
+        public event Action<bool>? TransactionFinish;
 
-        public ShopRepositoryMock()
+        public ShopDataMock()
         {
-            this.instrumentStock = new List<IInstrument>()
-            {
-                new InstrumentMock("instrument1", InstrumentCategory.String, 0M, 10, 10),
-                new InstrumentMock("instrument2", InstrumentCategory.Percussion, 0M, 10, 10)
-            };
-            this.consumerFunds = 1000000M;
+            AddInstrument(new InstrumentMock("Pianino", InstrumentType.String, 5000, 2014, 10));
+            AddInstrument(new InstrumentMock("Fortepian", InstrumentType.String, 6000, 2014, 10));
+            AddInstrument(new InstrumentMock("Gitara", InstrumentType.String, 2200, 2020, 20));
+            AddInstrument(new InstrumentMock("Trąbka", InstrumentType.Wind, 1500, 2018, 5));
+            AddInstrument(new InstrumentMock("Tamburyn", InstrumentType.Percussion, 500, 2011, 2));
         }
 
         public void AddInstrument(IInstrument instrument)
         {
-            instrumentStock.Add(instrument);
+            instruments.Add(instrument.Id, instrument);
         }
 
-        public void AddInstruments(List<IInstrument> instrumentsToAdd)
+        public IInstrument GetInstrumentByID(Guid instrumentId)
         {
-            instrumentStock.AddRange(instrumentsToAdd);
+            IInstrument? instrument = instruments[instrumentId];
+            if (instrument == null)
+            {
+                throw new KeyNotFoundException();
+            }
+            return instrument;
         }
 
-        public void ChangeConsumerFunds(Guid instrumentId, decimal instrumentPrice)
+        public List<IInstrument> GetInstruments()
+        {
+            return new List<IInstrument>(instruments.Values);
+        }
+
+        public float GetCustomerFunds()
         {
             throw new NotImplementedException();
         }
 
-        public void DecrementInstrumentQuantity(Guid instrumentId)
-        {
-            IInstrument? instrument = instrumentStock.Find(i => i.Id.Equals(instrumentId));
-            if (instrument != null && instrument.Quantity > 0)
-            {
-                instrument.Quantity -= 1;
-            }
-        }
-
-        public IList<IInstrument> GetAllInstruments()
-        {
-            return instrumentStock;
-        }
-
-        public IInstrument? GetInstrumentById(Guid productId)
-        {
-            return instrumentStock.Find(i => i.Id.Equals(productId));
-        }
-
-        public IList<IInstrument> GetInstrumentsByCategory(string category)
-        {
-            if (!Enum.TryParse(category, true, out InstrumentCategory instrumentCategory))
-            {
-                throw new ArgumentException("Invalid instrument category.", nameof(category));
-            }
-            return new ReadOnlyCollection<IInstrument>(instrumentStock.Where(i => i.Category == instrumentCategory).ToList());
-        }
-
-        public decimal GetConsumerFunds()
-        {
-            return consumerFunds;
-        }
-
-        public void ChangeConsumerFunds(Guid instrumentId)
-        {
-            IInstrument? i = instrumentStock.Find(i => i.Equals(instrumentId));
-            if (i != null)
-            {
-                consumerFunds -= i.Price;
-            }
-        }
-        public void ChangeConsumerFundsCS(decimal consumerFunds)
+        public Task SellInstrument(Guid instrumentId)
         {
             throw new NotImplementedException();
         }
-        public IDisposable Subscribe(IObserver<IInstrument> observer)
+
+        public List<IInstrument> GetInstrumentsByType(InstrumentType type)
+        {
+            return instruments.Values
+                .Where(item => item.Type == type)
+                .ToList();
+        }
+
+        public IDisposable Subscribe(IObserver<InflationChangedEventArgs> observer)
         {
             return null;
         }
-        public IDisposable Subscribe(IObserver<decimal> observer)
+
+        public IDisposable Subscribe(IObserver<float> observer)
         {
             return null;
         }
-        public Task Connect(Uri uri)
+    }
+
+    internal class InstrumentMock : IInstrument
+    {
+        public Guid Id { get; }
+        public string Name { get; private set; }
+        public InstrumentType Type { get; }
+        public float Price { get; set; }
+        public int Year { get; }
+        public int Quantity { get; set; }
+
+        public InstrumentMock(string name, InstrumentType type, float price, int year, int quantity)
         {
-            throw new NotImplementedException();
+            Id = Guid.NewGuid();
+            Name = name;
+            Type = type;
+            Price = price;
+            Year = year;
+            Quantity = quantity;
         }
 
-        public Task SendMessageAsync(string message)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IConnectionService GetConnectionService()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task TryBuyingInstrument(IInstrument instrument)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task TryBuy(IInstrument instrument)
+        public object Clone()
         {
             throw new NotImplementedException();
         }

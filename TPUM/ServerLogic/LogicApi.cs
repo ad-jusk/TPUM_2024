@@ -1,20 +1,24 @@
-﻿using Tpum.ServerData;
-using Tpum.ServerLogic.Interfaces;
+﻿using ServerData;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Tpum.ServerLogic
+namespace ServerLogic
 {
     internal class LogicApi : LogicAbstractApi
     {
-        private readonly IStore store;
+        private readonly IShopLogic shop;
 
         public LogicApi(DataAbstractApi dataApi) : base(dataApi)
         {
-            this.store = new Store(dataApi.GetShopRepository());
+            shop = new ShopLogic(dataApi.GetShop());
         }
 
-        public override IStore GetStore()
+        public override IShopLogic GetShop()
         {
-            return store;
+            return shop;
         }
     }
 }
