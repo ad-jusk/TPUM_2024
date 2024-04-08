@@ -7,7 +7,7 @@ using Commons;
 
 namespace Data
 {
-    internal class WebSocketClient
+    public class WebSocketClient
     {
         public static async Task<WebSocketConnection> Connect(Uri peer, Action<string>? logger)
         {

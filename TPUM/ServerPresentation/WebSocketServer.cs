@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ServerPresentation
 {
-    internal static class WebSocketServer
+    public static class WebSocketServer
     {
         public static async Task StartServer(int p2pPort, Action<WebSocketConnection> onConnection)
         {
