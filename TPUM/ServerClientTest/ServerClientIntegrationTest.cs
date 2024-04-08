@@ -12,7 +12,7 @@ namespace ServerClientTest
         {
             WebSocketConnection _wserver = null;
             WebSocketConnection _wclient = null;
-            const int _delay = 10;
+            const int _delay = 15;
 
             Uri uri = new Uri("ws://localhost:6966");
             List<string> logOutput = new List<string>();
@@ -24,11 +24,18 @@ namespace ServerClientTest
                         logOutput.Add($"Received message from client: {data}");
                     };
                 }));
+
             await Task.Delay(_delay);
+            
             _wclient = await WebSocketClient.Connect(uri, message => logOutput.Add(message));
 
             Assert.IsNotNull(_wserver);
             Assert.IsNotNull(_wclient);
+
+            await Task.Delay(_delay);
+
+            await _wclient.DisconnectAsync();
+            await _wserver.DisconnectAsync();
         }
     }
 }
