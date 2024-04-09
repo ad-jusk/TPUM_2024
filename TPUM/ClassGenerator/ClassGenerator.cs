@@ -12,8 +12,11 @@ namespace ClassGenerator
             JsonSchema instrumentSchema =  JsonSchema.FromType<InstrumentDTO>();
             JsonSchema newPriceSchema =  JsonSchema.FromType<NewPriceDTO>();
 
-            saveCSharpFile(instrumentSchema, "../../../InstrumentDTOGenerated.cs");
-            saveCSharpFile(newPriceSchema, "../../../NewPriceDTOGenerated.cs");
+            instrumentSchema.Title = instrumentSchema.Title + "Generated";
+            newPriceSchema.Title = newPriceSchema.Title + "Generated";
+
+            saveCSharpFile(instrumentSchema, "../../../../Commons/InstrumentDTOGenerated.cs");
+            saveCSharpFile(newPriceSchema, "../../../../Commons/NewPriceDTOGenerated.cs");
         }
 
         private static void saveCSharpFile(JsonSchema schema, string filename)
