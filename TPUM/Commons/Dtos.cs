@@ -49,14 +49,24 @@ namespace Commons
     }
 
     [Serializable]
-    public struct InstrumentDTO
+    public class InstrumentDTO
     {
-        public Guid Id;
-        public string Name;
-        public string Type;
-        public float Price;
-        public int Year;
-        public int Quantity;
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public string Type { get; set; }
+        public float Price { get; set; }
+        public int Year { get; set; }
+        public int Quantity { get; set; }
+
+        public InstrumentDTO()
+        {
+            Id = Guid.NewGuid();
+            Name = string.Empty;
+            Type = string.Empty;
+            Price = 0f;
+            Year = 0;
+            Quantity = 0;
+        }
 
         public InstrumentDTO(Guid id, string name, string type, float price, int year, int quantity)
         {
@@ -70,10 +80,13 @@ namespace Commons
     }
 
     [Serializable]
-    public struct NewPriceDTO
-    {
-        public Guid InstrumentID;
-        public float NewPrice;
+    public class NewPriceDTO
+    { 
+
+        public Guid InstrumentID { get; set; }
+        public float NewPrice { get; set; }
+
+        public NewPriceDTO() { }
 
         public NewPriceDTO(Guid instrumentId, float newPrice)
         {
