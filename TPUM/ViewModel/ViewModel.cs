@@ -1,5 +1,4 @@
 ﻿using GalaSoft.MvvmLight.Command;
-using Model;
 using Presentation.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
