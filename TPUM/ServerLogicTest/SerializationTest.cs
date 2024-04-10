@@ -128,5 +128,25 @@ namespace ServerLogicTest
             Assert.AreEqual(year, deserialized.Year);
             Assert.AreEqual(quantity, deserialized.Quantity);
         }
+        [TestMethod]
+        public void Should_Handle_Null_Object()
+        {
+            InstrumentDTO dto = null;
+
+            string json = serializer.Serialize(dto);
+
+            Assert.AreEqual("null", json); 
+        }
+
+        [TestMethod]
+        public void Should_Handle_Empty_Json()
+        {
+            string json = "";
+
+            var deserialized = serializer.Deserialize<InstrumentDTO>(json);
+
+            Assert.IsNull(deserialized);
+        }
+
     }
 }
