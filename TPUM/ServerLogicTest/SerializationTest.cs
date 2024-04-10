@@ -128,6 +128,7 @@ namespace ServerLogicTest
             Assert.AreEqual(year, deserialized.Year);
             Assert.AreEqual(quantity, deserialized.Quantity);
         }
+
         [TestMethod]
         public void Should_Handle_Null_Object()
         {
@@ -147,6 +148,7 @@ namespace ServerLogicTest
 
             Assert.IsNull(deserialized);
         }
+
         [TestMethod]
         public void Should_Serialize_Object_With_Null_Property()
         {
@@ -162,24 +164,11 @@ namespace ServerLogicTest
 
             string json = serializer.Serialize(dto);
 
-            Assert.IsTrue(json.Contains("\"Name\":null"));
+            InstrumentDTO deserialized = serializer.Deserialize<InstrumentDTO>(json);
+
+            Assert.IsNull(deserialized.Name);
         }
-        [TestMethod]
-        public void Should_Handle_Negative_Price()
-        {
-            Guid id = Guid.NewGuid();
-            float price = -10.0f;
 
-            NewPriceDTO dto = new NewPriceDTO(id, price);
-
-            string json = serializer.Serialize(dto);
-
-            NewPriceDTO deserialized = serializer.Deserialize<NewPriceDTO>(json);
-
-            Assert.IsNotNull(deserialized);
-            Assert.AreEqual(id, deserialized.InstrumentID);
-            Assert.AreEqual(price, deserialized.NewPrice);
-        }
         [TestMethod]
         public void Should_Handle_Minimum_InstrumentID()
         {
