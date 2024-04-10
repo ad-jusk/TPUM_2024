@@ -14,7 +14,6 @@ namespace Presentation.View
         {
             if (value is string category)
             {
-                // Assuming your images are located in a folder named "Images"
                 return new Uri($"/View;component/Images/{category}.jpg", UriKind.Relative);
             }
             return null;

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Logic;
-using Model;
-using Presentation.Model;
 
 namespace Presentation.Model
 {

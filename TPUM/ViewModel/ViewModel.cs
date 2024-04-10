@@ -1,5 +1,4 @@
 ﻿using GalaSoft.MvvmLight.Command;
-using Model;
 using Presentation.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -19,6 +18,7 @@ namespace Presentation.ViewModel
         }
 
         private CurrentTab currentTab;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private ObservableCollection<InstrumentPresentation> instruments;
         public ObservableCollection<InstrumentPresentation> Instruments
@@ -151,7 +151,5 @@ namespace Presentation.ViewModel
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }

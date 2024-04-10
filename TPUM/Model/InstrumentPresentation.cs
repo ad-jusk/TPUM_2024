@@ -2,9 +2,8 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Logic;
-using Presentation.Model;
 
-namespace Model
+namespace Presentation.Model
 {
     public class InstrumentPresentation : INotifyPropertyChanged
     {
