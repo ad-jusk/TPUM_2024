@@ -36,6 +36,14 @@ namespace ServerLogic
             {
                 shop.SellInstrument(foundItem.Id);
             }
+            else if(foundItem.Quantity == 0)
+            {
+                throw new Exception("Instrument quantity is zero.");
+            }
+            else
+            {
+                throw new Exception("Instrument not found.");
+            }
         }
 
         public List<IInstrumentLogic> GetInstruments()
